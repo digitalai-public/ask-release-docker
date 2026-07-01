@@ -225,7 +225,7 @@ Before starting the local Release profile
 The bind mount overrides the image's default `xl-release.conf`. All
 other configuration comes from the `release` image defaults and the env
 vars in your layered `.env`. To restore a clean config after edits:
-`git checkout test/release/default-conf/xl-release.conf.template test/release/conf/xl-release.conf`.
+`rm -f test/release/conf/xl-release.conf && docker compose restart release`.
 
 ## 4) Optional reverse proxy (--profile with-nginx)
 
