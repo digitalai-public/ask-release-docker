@@ -17,9 +17,7 @@ services:
     container_name: ask-release-llm-service-dbinit
     restart: "no"
     environment:
-      <<: *llm-common
-      LLM_SERVICE_DEFAULT_PROVIDER_CONFIG: ${LLM_SERVICE_DEFAULT_PROVIDER_CONFIG:-Default provider configuration is missing}
-      LLM_SERVICE_DEFAULT_SYSTEM_MODEL_ALIAS_MAPPINGS: ${LLM_SERVICE_DEFAULT_SYSTEM_MODEL_ALIAS_MAPPINGS:-}
+      LLM_SERVICE_DEFAULT_PROVIDER_CONFIG: ${LLM_SERVICE_DEFAULT_PROVIDER_CONFIG:?LLM_SERVICE_DEFAULT_PROVIDER_CONFIG must be set (base64-encoded JSON)}
       DAI_FEATURE__PLAINTEXT_LOGGING: ${LLM_DBINIT_PLAINTEXT_LOGGING:-true}
       DAI_SERVICE_LOG_LEVEL: ${LLM_DBINIT_LOG_LEVEL:-trace}
     networks:
