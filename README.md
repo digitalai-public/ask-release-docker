@@ -9,18 +9,18 @@ This repository ships two documents, one compose stack each:
 | Document | Covers | Compose file |
 |---|---|---|
 | `README.md` (this file) | **Production deployment** of the CORE services. External Postgres, Release, IdP, LLM endpoint. Secure connectivity, sizing, RBAC, backup/DR, monitoring, private-CA trust. | `docker-compose.yaml` (root) |
-| [test/README.md](test/README.md) | **Lab / local-stack deployment**. Local Keycloak, local Digital.ai Release, local PostgreSQL, optional nginx reverse proxy, lab setup recipes, troubleshooting for lab-only issues. | `test/docker-compose.yaml` |
+| [test-lab/README.md](test-lab/README.md) | **Lab / local-stack deployment**. Local Keycloak, local Digital.ai Release, local PostgreSQL, optional nginx reverse proxy, lab setup recipes, troubleshooting for lab-only issues. | `test-lab/docker-compose.yaml` |
 
 The split mirrors the compose-file split: the CORE compose (`docker-compose.yaml`)
 ships the three production services (release-assistant, release-mcp,
-llm-service), and the TEST compose (`test/docker-compose.yaml`) ships
+llm-service), and the TEST compose (`test-lab/docker-compose.yaml`) ships
 the opt-in lab services (keycloak, nginx, postgres, release). For
 local-lab end-to-end runs, combine them with `-f docker-compose.yaml
--f test/docker-compose.yaml`. Always pass `--project-directory .` so
+-f test-lab/docker-compose.yaml`. Always pass `--project-directory .` so
 Compose resolves `extends` paths against the project root.
 
 Both documents cross-reference each other. Every section that is lab-only
-links to the relevant test/README.md section; every section that is
+links to the relevant test-lab/README.md section; every section that is
 production-only links back here.
 
 ## 1) Scope and deployment model
@@ -183,10 +183,10 @@ Scaling considerations:
   - `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit`
 - WARNING: `xebialabsunsupported/*` images are for internal usage only. For production documentation and production deployments, use `xebialabs/*` images.
 - **OIDC identity provider** (Okta, Microsoft Entra ID, Ping Identity, Auth0, or any compliant OIDC provider) with JWKS endpoint reachable from Assistant and LLM service. For the full IdP client setup walkthrough, see §8.3.
-- **Digital.ai Release** instance reachable from the host running the CORE services on the HTTPS port (default `5516`). Minimum supported version: `26.1.3` (see §21). The optional `with-release` lab profile is documented in [test/README.md §3](test/README.md#3-local-digitalai-release--profile-with-release).
-- **PostgreSQL 14+** provisioned and reachable from the host running the CORE services. The optional `with-postgres` lab profile is documented in [test/README.md §1](test/README.md#1-overview). For the customer-managed Postgres production path, see §8.1.
+- **Digital.ai Release** instance reachable from the host running the CORE services on the HTTPS port (default `5516`). Minimum supported version: `26.1.3` (see §21). The optional `with-release` lab profile is documented in [test-lab/README.md §3](test-lab/README.md#3-local-digitalai-release--profile-with-release).
+- **PostgreSQL 14+** provisioned and reachable from the host running the CORE services. The optional `with-postgres` lab profile is documented in [test-lab/README.md §1](test-lab/README.md#1-overview). For the customer-managed Postgres production path, see §8.1.
 - LLM provider endpoint + credentials (or run the local LLM service via `--profile with-llm-service`)
-- For the lab `with-nginx` profile only: TLS cert (with full chain) and key at `test/nginx/certs/tls.crt` and `test/nginx/certs/tls.key`, covering every vhost you intend to serve. See [test/README.md §5](test/README.md#5-reverse-proxy--https-ingress-production-grade-nginx) for the cert format and a self-signed local-lab example. (The `with-nginx` profile is a lab profile; the production equivalent is a corporate load balancer or WAF in front of the CORE services.)
+- For the lab `with-nginx` profile only: TLS cert (with full chain) and key at `test-lab/nginx/certs/tls.crt` and `test-lab/nginx/certs/tls.key`, covering every vhost you intend to serve. See [test-lab/README.md §5](test-lab/README.md#5-reverse-proxy--https-ingress-production-grade-nginx) for the cert format and a self-signed local-lab example. (The `with-nginx` profile is a lab profile; the production equivalent is a corporate load balancer or WAF in front of the CORE services.)
 
 ## 7) Repository layout
 
@@ -210,7 +210,7 @@ Scaling considerations:
 ├── install-internal-ca.sh                           # one-shot CA installer (idempotent)
 ├── llm-service/
 │   └── compose.yaml
-├── test/                                           # TEST/lab infrastructure (combine with -f)
+├── test-lab/                                           # TEST/lab infrastructure (combine with -f)
 │   ├── docker-compose.yaml                         # test services: keycloak, nginx, postgres, release
 │   ├── docker-compose.override.yaml.example        # opt-in TEST hardening overlay (§10.5)
 │   ├── docker-compose.with-internal-ca.yaml        # opt-in internal-CA trust overlay for the test `release` service (§28)
@@ -247,34 +247,34 @@ Scaling considerations:
 ├── .env                                            # your customised env (gitignored; copy from .env.base and edit)
 ├── .env.base                                       # checked-in defaults: images, ports, hostnames, auth, OIDC
 ├── README.md                                       # this file (production / CORE deployment)
-└── test/
+└── test-lab/
     ├── README.md                                   # lab / local-stack deployment (test profiles)
     ├── docker-compose.yaml                         # test services: keycloak, nginx, postgres, release
 ```
 
 Notes:
 
-- The repo is split into a CORE compose (`docker-compose.yaml` at root) and a TEST compose (`test/docker-compose.yaml`). For local-lab end-to-end runs, combine them with `-f docker-compose.yaml -f test/docker-compose.yaml`. Always pass `--project-directory .` so Compose resolves `extends` paths against the project root. The two documents ([README.md](README.md) for CORE, [test/README.md](test/README.md) for TEST) map 1:1 to the two compose files; see §0 above.
+- The repo is split into a CORE compose (`docker-compose.yaml` at root) and a TEST compose (`test-lab/docker-compose.yaml`). For local-lab end-to-end runs, combine them with `-f docker-compose.yaml -f test-lab/docker-compose.yaml`. Always pass `--project-directory .` so Compose resolves `extends` paths against the project root. The two documents ([README.md](README.md) for CORE, [test-lab/README.md](test-lab/README.md) for TEST) map 1:1 to the two compose files; see §0 above.
 - `.env.base` is the single checked-in defaults file. It sets container image tags, exposed host ports, public FQDNs, derived public URLs, `OAUTH2_TOKEN_CLIENT_ID` / `OAUTH2_TOKEN_CLIENT_SECRET`, and `OIDC_ISSUER_URI`. Every other env var consumed by the per-service compose files has an inline `${VAR:-default}` fallback baked into the compose file itself. `.env.base` ships commented templates for the most common overrides; copy `.env.base` to `.env` (gitignored) and uncomment / set the vars you want to override.
 - The initdb scripts run alphabetically on first PostgreSQL startup. Users are created before their databases so role ownership can be applied during `CREATE DATABASE`.
 
-The top-level `docker-compose.yaml` aggregates the CORE per-service compose files via `extends`, matching the split compose style used in `dai-release-assistant/docker`. The TEST compose file in `test/` aggregates the test infra the same way.
+The top-level `docker-compose.yaml` aggregates the CORE per-service compose files via `extends`, matching the split compose style used in `dai-release-assistant/docker`. The TEST compose file in `test-lab/` aggregates the test infra the same way.
 
 By default, the stack assumes customers already have Release, an IdP, and PostgreSQL provisioned (i.e. point `RELEASE_PUBLIC_URL` / `OIDC_ISSUER_URI` / `POSTGRES_HOSTNAME` at the managed services).
 The local Release / Keycloak / PostgreSQL containers are optional and only enabled with their respective `with-*` profiles (combine with `--profile with-llm-service` for the full local lab).
 
 Deployment modes:
 
-For scenario-specific installation instructions, see §8.1/§8.2/§8.3 (production paths) and [test/README.md §9-§10](test/README.md#9-hybrid-scenario-on-prem-assistant--saas-llm) (hybrid / BYO-LLM scenarios).
+For scenario-specific installation instructions, see §8.1/§8.2/§8.3 (production paths) and [test-lab/README.md §9-§10](test-lab/README.md#9-hybrid-scenario-on-prem-assistant--saas-llm) (hybrid / BYO-LLM scenarios).
 
  | Mode | Command | Local LLM Service | Local Release | Reverse proxy |
  |---|---|---|---|---|
  | Default (production-like, external LLM service/DB/Release/IdP) | `docker compose --profile with-llm-service up -d llm-service-api release-mcp release-assistant` (run `llm-service-dbinit` first) | Yes | No | No |
  | Core without local LLM | `docker compose up -d release-mcp release-assistant` | No | No | No |
- | Full local lab (with TEST compose) | `docker compose -f docker-compose.yaml -f test/docker-compose.yaml --profile with-release --profile with-postgres --profile with-llm-service up -d ...` (run `llm-service-dbinit` first) | Yes | Yes | No |
- | Production ingress (HTTPS) | place a corporate LB / WAF in front of the CORE services. The `with-nginx` profile is a lab-only convenience for the same pattern; see [test/README.md §4-§5](test/README.md#4-optional-reverse-proxy--profile-with-nginx) | optional | optional | optional (lab proxy) |
+ | Full local lab (with TEST compose) | `docker compose -f docker-compose.yaml -f test-lab/docker-compose.yaml --profile with-release --profile with-postgres --profile with-llm-service up -d ...` (run `llm-service-dbinit` first) | Yes | Yes | No |
+ | Production ingress (HTTPS) | place a corporate LB / WAF in front of the CORE services. The `with-nginx` profile is a lab-only convenience for the same pattern; see [test-lab/README.md §4-§5](test-lab/README.md#4-optional-reverse-proxy--profile-with-nginx) | optional | optional | optional (lab proxy) |
 
-All commands assume `--project-directory .` is passed and `.env` (your customised copy of `.env.base`, gitignored) is present in the project root so Compose reads it implicitly. No `--env-file` flag is needed. See [test/README.md §8](test/README.md#8-lab-setup-recipes) for copy/paste lab recipes (replaces the previous SETUP.md).
+All commands assume `--project-directory .` is passed and `.env` (your customised copy of `.env.base`, gitignored) is present in the project root so Compose reads it implicitly. No `--env-file` flag is needed. See [test-lab/README.md §8](test-lab/README.md#8-lab-setup-recipes) for copy/paste lab recipes (replaces the previous SETUP.md).
 
 ## 8) Quick start
 
@@ -332,39 +332,39 @@ docker compose --project-directory . \
 
 ```bash
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres up -d postgres
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service up llm-service-dbinit
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service up -d llm-service-api release-mcp release-assistant
 ```
 
-For lab-only stacks (local Digital.ai Release, local Keycloak, optional nginx reverse proxy), full local lab recipes, the BYO-LLM and Hybrid install scenarios, lab setup recipes, and test-stack troubleshooting, see [test/README.md](test/README.md).
+For lab-only stacks (local Digital.ai Release, local Keycloak, optional nginx reverse proxy), full local lab recipes, the BYO-LLM and Hybrid install scenarios, lab setup recipes, and test-stack troubleshooting, see [test-lab/README.md](test-lab/README.md).
 
 ### 8.0 Lab profiles and local stack
 
 > **Lab profiles only.** This section is a pointer to the lab/lab-stack
 > documentation. The CORE deployment documented in this README does not
-> depend on any `test/` profile.
+> depend on any `test-lab/` profile.
 
-| Lab profile | Description | test/README.md |
+| Lab profile | Description | test-lab/README.md |
 |---|---|---|
-| `--profile with-keycloak` | Local Keycloak IdP preloaded with the `xl-platform` realm | [§2](test/README.md#2-local-keycloak-idp--profile-with-keycloak) |
-| `--profile with-release` | Local Digital.ai Release container (uses `test/release/conf/` bind mount + HOCON template) | [§3](test/README.md#3-local-digitalai-release--profile-with-release) |
-| `--profile with-postgres` | Local PostgreSQL 18 for non-production / PoC runs | (see [test/README.md §1](test/README.md#1-overview) and §8 recipes) |
-| `--profile with-nginx` | Optional nginx reverse proxy terminating TLS in front of the public-facing vhosts | [§4](test/README.md#4-optional-reverse-proxy--profile-with-nginx), [§5](test/README.md#5-reverse-proxy--https-ingress-production-grade-nginx) |
-| (Hybrid / BYO-LLM) | On-Prem Assistant + SaaS LLM, or customer-managed local LLM Service | [§9](test/README.md#9-hybrid-scenario-on-prem-assistant--saas-llm), [§10](test/README.md#10-byo-llm-scenario-llm-service-self-hosted) |
-| (Lab setup recipes) | 6 copy/paste workflows covering each combination of profiles | [§8](test/README.md#8-lab-setup-recipes) |
-| (Lab troubleshooting) | nginx-cert, external-network-flag, chown-permission-denied | [§13](test/README.md#13-lab-troubleshooting) |
+| `--profile with-keycloak` | Local Keycloak IdP preloaded with the `xl-platform` realm | [§2](test-lab/README.md#2-local-keycloak-idp--profile-with-keycloak) |
+| `--profile with-release` | Local Digital.ai Release container (uses `test-lab/release/conf/` bind mount + HOCON template) | [§3](test-lab/README.md#3-local-digitalai-release--profile-with-release) |
+| `--profile with-postgres` | Local PostgreSQL 18 for non-production / PoC runs | (see [test-lab/README.md §1](test-lab/README.md#1-overview) and §8 recipes) |
+| `--profile with-nginx` | Optional nginx reverse proxy terminating TLS in front of the public-facing vhosts | [§4](test-lab/README.md#4-optional-reverse-proxy--profile-with-nginx), [§5](test-lab/README.md#5-reverse-proxy--https-ingress-production-grade-nginx) |
+| (Hybrid / BYO-LLM) | On-Prem Assistant + SaaS LLM, or customer-managed local LLM Service | [§9](test-lab/README.md#9-hybrid-scenario-on-prem-assistant--saas-llm), [§10](test-lab/README.md#10-byo-llm-scenario-llm-service-self-hosted) |
+| (Lab setup recipes) | 6 copy/paste workflows covering each combination of profiles | [§8](test-lab/README.md#8-lab-setup-recipes) |
+| (Lab troubleshooting) | nginx-cert, external-network-flag, chown-permission-denied | [§13](test-lab/README.md#13-lab-troubleshooting) |
 
 For the **production install scenarios** (external customer-managed
 Postgres / Release / OIDC IdP), see §8.1 / §8.2 / §8.3 below. For
 lab-stack day-to-day operations (logs, restart, pull, health checks
 with the local Release), see
-[test/README.md §7](test/README.md#7-common-operations-on-the-lab-stack).
+[test-lab/README.md §7](test-lab/README.md#7-common-operations-on-the-lab-stack).
 
 
 - PostgreSQL consolidation is supported: customers can host Assistant and LLM service data on the same PostgreSQL server using separate databases/schemas.
@@ -801,7 +801,7 @@ is present in the project root. Compose reads it implicitly - no
 `--env-file` flag is needed. These commands operate on the CORE
 services only (release-assistant, release-mcp, llm-service). For
 lab-stack variants that include the local Digital.ai Release, see
-[test/README.md §7](test/README.md#7-common-operations-on-the-lab-stack).
+[test-lab/README.md §7](test-lab/README.md#7-common-operations-on-the-lab-stack).
 
 #### 8.4.1 List running services
 
@@ -1049,10 +1049,10 @@ docker compose -f docker-compose.yaml -f docker-compose.override.yaml up -d
 **Disable:** delete `docker-compose.override.yaml`.
 
 > **Test compose overlay (lab services).** A parallel overlay at
-> `test/docker-compose.override.yaml.example` applies the same
+> `test-lab/docker-compose.override.yaml.example` applies the same
 > hardening posture to the test services (release, postgres, keycloak,
 > nginx). Activate it only when running combined labs - see
-> [test/README.md §6](test/README.md#6-test-hardening-overlay).
+> [test-lab/README.md §6](test-lab/README.md#6-test-hardening-overlay).
 
 **What the overlays apply:**
 
@@ -1079,7 +1079,7 @@ docker compose -f docker-compose.yaml -f docker-compose.override.yaml up -d
 
 For the TEST-side resource limits (release, postgres, keycloak, nginx)
 and the test overlay activation, see
-[test/README.md §6](test/README.md#6-test-hardening-overlay).
+[test-lab/README.md §6](test-lab/README.md#6-test-hardening-overlay).
 
 **Network segmentation:**
 
@@ -1125,9 +1125,9 @@ For the Postgres base image, prefer a specific minor (e.g. `postgres:18.6-alpine
 
 > **Lab profile only.** The `with-nginx` profile is a lab convenience
 > that terminates TLS in front of the CORE services. It is documented
-> in [test/README.md §4](test/README.md#4-optional-reverse-proxy--profile-with-nginx)
+> in [test-lab/README.md §4](test-lab/README.md#4-optional-reverse-proxy--profile-with-nginx)
 > (quick start) and
-> [test/README.md §5](test/README.md#5-reverse-proxy--https-ingress-production-grade-nginx)
+> [test-lab/README.md §5](test-lab/README.md#5-reverse-proxy--https-ingress-production-grade-nginx)
 > (architecture, capability matrix, vhost mapping, cert format,
 > network flows, production recommendations, verification,
 > troubleshooting).
@@ -1146,7 +1146,7 @@ Typical invocation:
 
 ```bash
 docker compose --project-directory . \
-  -f docker-compose.yaml [-f test/docker-compose.yaml] \
+  -f docker-compose.yaml [-f test-lab/docker-compose.yaml] \
   [-f docker-compose.with-internal-ca.yaml] \
   --profile <profiles> <command>
 ```
@@ -1169,7 +1169,7 @@ Override any var shown below in `.env`. The default values shown in the tables b
 
 > **Production image replacement**: the `xebialabsunsupported/*` references above are internal-only. For production documentation and production deployments, switch to the approved `xebialabs/*` image references per the §20 compatibility matrix.
 >
-> **Test-stack image tags** (`RELEASE_IMAGE`, `KEYCLOAK_IMAGE`, `POSTGRES_IMAGE`, `NGINX_IMAGE`) are documented in [test/README.md §12](test/README.md#12-test-stack-configuration-reference).
+> **Test-stack image tags** (`RELEASE_IMAGE`, `KEYCLOAK_IMAGE`, `POSTGRES_IMAGE`, `NGINX_IMAGE`) are documented in [test-lab/README.md §12](test-lab/README.md#12-test-stack-configuration-reference).
 
 ### Exposed host ports (`.env.base`)
 
@@ -1182,7 +1182,7 @@ Override any var shown below in `.env`. The default values shown in the tables b
 > **Test-stack exposed host ports** (`RELEASE_HTTP_PORT`,
 > `KEYCLOAK_HTTP_PORT`, `KEYCLOAK_MGMT_PORT`, `POSTGRES_PORT`,
 > `NGINX_HTTPS_PORT`) are documented in
-> [test/README.md §12](test/README.md#12-test-stack-configuration-reference).
+> [test-lab/README.md §12](test-lab/README.md#12-test-stack-configuration-reference).
 
 ### Public FQDNs (`.env.base`)
 
@@ -1195,7 +1195,7 @@ These are consumed by the nginx vhost configs and injected into TLS cert SANs. L
 
 > **Test-stack public FQDNs** (`RELEASE_HOSTNAME`, `IDP_HOSTNAME`) are
 > documented in
-> [test/README.md §12](test/README.md#12-test-stack-configuration-reference).
+> [test-lab/README.md §12](test-lab/README.md#12-test-stack-configuration-reference).
 
 ### Public URLs (`.env.base`)
 
@@ -1313,7 +1313,7 @@ These vars are not declared in `.env.base`; their `${VAR:-default}` fallbacks li
 
 > **Test-stack compose-internal defaults** (keycloak, nginx, postgres,
 > release - image/admin, DB, OIDC, HOCON template vars) are documented
-> in [test/README.md §12](test/README.md#12-test-stack-configuration-reference).
+> in [test-lab/README.md §12](test-lab/README.md#12-test-stack-configuration-reference).
 
 ### Security, certificates, and proxy
 
@@ -1535,7 +1535,7 @@ For change windows with strict uptime targets, front components with a load bala
 > **Lab nginx** (only with `--profile with-nginx`) is a proxy with no
 > HTTP health endpoint of its own; confirm it is healthy via
 > `docker compose ps nginx`. Per-vhost TLS-terminated curls are in
-> [test/README.md §5](test/README.md#5-reverse-proxy--https-ingress-production-grade-nginx).
+> [test-lab/README.md §5](test-lab/README.md#5-reverse-proxy--https-ingress-production-grade-nginx).
 
 ### 14.2 Connectivity verification commands
 
@@ -1552,7 +1552,7 @@ docker compose exec release-assistant curl -fsS "http://llm-service-api:9000/llm
 
 For nginx-fronted lab connectivity checks (only with
 `--profile with-nginx`), see
-[test/README.md §5 verification](test/README.md#5-reverse-proxy--https-ingress-production-grade-nginx).
+[test-lab/README.md §5 verification](test-lab/README.md#5-reverse-proxy--https-ingress-production-grade-nginx).
 
 ### 14.3 Common issues and first response
 
@@ -1569,7 +1569,7 @@ For nginx-fronted lab connectivity checks (only with
 
 > **Lab-only troubleshooting** (nginx cert / vhost / external-network-flag /
 > chown-permission-denied) is documented in
-> [test/README.md §13](test/README.md#13-lab-troubleshooting).
+> [test-lab/README.md §13](test-lab/README.md#13-lab-troubleshooting).
 
 Debug logging knobs:
 
@@ -1582,7 +1582,7 @@ Debug logging knobs:
 2. Confirm Assistant endpoint: `curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness"`.
 3. Confirm MCP endpoint: `curl -fsS "http://localhost:${MCP_PORT:-8000}/utility/healthcheck"`.
 4. In local LLM mode, confirm LLM endpoint: `curl -fsS "http://localhost:${LLM_SERVICE_PORT:-9000}/llm/utility/ping"`.
-5. When using the lab nginx reverse proxy (`--profile with-nginx`), also confirm the proxy terminates TLS and routes to each active vhost - see [test/README.md §5 verification](test/README.md#5-reverse-proxy--https-ingress-production-grade-nginx) for the per-vhost curls.
+5. When using the lab nginx reverse proxy (`--profile with-nginx`), also confirm the proxy terminates TLS and routes to each active vhost - see [test-lab/README.md §5 verification](test-lab/README.md#5-reverse-proxy--https-ingress-production-grade-nginx) for the per-vhost curls.
 6. Run one end-to-end Ask Release prompt in Release UI and confirm a successful response.
 7. Run one RBAC negative test (user without access to a target object) and verify access is denied/scoped by Release permissions.
 
@@ -1590,7 +1590,7 @@ Debug logging knobs:
 
 1. Run the default stack health sequence (Assistant + MCP + LLM service); add Release liveness when local Release is included.
 2. Verify versioned images running: `docker compose ps` and confirm expected tags.
-3. When using the lab nginx reverse proxy (`--profile with-nginx`), also re-run one curl per active vhost - see [test/README.md §5 verification](test/README.md#5-reverse-proxy--https-ingress-production-grade-nginx).
+3. When using the lab nginx reverse proxy (`--profile with-nginx`), also re-run one curl per active vhost - see [test-lab/README.md §5 verification](test-lab/README.md#5-reverse-proxy--https-ingress-production-grade-nginx).
 4. Repeat the end-to-end Ask Release prompt test in Release UI.
 5. Repeat the RBAC negative test to confirm no permission regression.
 6. Review logs for migration/auth/provider errors: `docker compose logs --since=10m release-mcp llm-service-api release-assistant` (add `nginx` to the list when the proxy is active).
@@ -1917,8 +1917,8 @@ overlay). They are NOT in the per-service compose files, so a
 without internal-CA trust.
 
 The release (test profile) trust surface is wired in
-`test/docker-compose.with-internal-ca.yaml` (the test overlay). It is
-NOT in `test/release/compose.yaml`, so a `docker compose up` of the
+`test-lab/docker-compose.with-internal-ca.yaml` (the test overlay). It is
+NOT in `test-lab/release/compose.yaml`, so a `docker compose up` of the
 test stack without the overlay starts the test `release` service
 without internal-CA trust. The test overlay also mounts
 `certs/ca-bundle.pem` for parity with the production overlay (the test
@@ -1962,7 +1962,7 @@ every internal-CA-aware service in both the CORE and TEST stacks.
 
 4. Add `-f docker-compose.with-internal-ca.yaml` to every `docker
    compose` invocation. For the full end-to-end stack (CORE + TEST),
-   also add `-f test/docker-compose.with-internal-ca.yaml`:
+   also add `-f test-lab/docker-compose.with-internal-ca.yaml`:
 
    ```bash
    # CORE-only with internal-CA trust
@@ -1977,9 +1977,9 @@ every internal-CA-aware service in both the CORE and TEST stacks.
    docker compose \
      --project-directory . \
      -f docker-compose.yaml \
-     -f test/docker-compose.yaml \
+     -f test-lab/docker-compose.yaml \
      -f docker-compose.with-internal-ca.yaml \
-     -f test/docker-compose.with-internal-ca.yaml \
+     -f test-lab/docker-compose.with-internal-ca.yaml \
      [--env-file .env-base] [--env-file .env-local] \
      --profile with-postgres --profile with-release \
      --profile with-keycloak --profile with-nginx \
@@ -2020,9 +2020,9 @@ docker compose -f docker-compose.yaml -f docker-compose.with-internal-ca.yaml \
 
 # 4) End-to-end check on the test `release` service (full stack only)
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   -f docker-compose.with-internal-ca.yaml \
-  -f test/docker-compose.with-internal-ca.yaml \
+  -f test-lab/docker-compose.with-internal-ca.yaml \
   exec release \
     curl -fS ${OIDC_ISSUER_URI}/.well-known/openid-configuration
 ```
@@ -2040,7 +2040,7 @@ order (root → intermediates → leaf) and rerun the script.
 | Adding a new internal endpoint | Re-run the script with a bundle that includes the new endpoint's CA; restart |
 | Removing an internal endpoint | No action; the trust store contains the CA chain, not individual endpoint pins |
 | CA expiry < 30 days | Add a calendar alert; rerun the script with the refreshed bundle before expiry |
-| Removing internal-CA trust entirely | Stop using `-f docker-compose.with-internal-ca.yaml` and `-f test/docker-compose.with-internal-ca.yaml`; `certs/` is unused again |
+| Removing internal-CA trust entirely | Stop using `-f docker-compose.with-internal-ca.yaml` and `-f test-lab/docker-compose.with-internal-ca.yaml`; `certs/` is unused again |
 
 The generated `certs/cacerts.jks` and `certs/ca-bundle.pem` are
 gitignored. The source of truth is the operator's PKI store, not

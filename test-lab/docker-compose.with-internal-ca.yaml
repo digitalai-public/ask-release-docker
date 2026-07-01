@@ -10,9 +10,9 @@
 #   docker compose \
 #     --project-directory . \
 #     -f docker-compose.yaml \
-#     -f test/docker-compose.yaml \
+#     -f test-lab/docker-compose.yaml \
 #     -f docker-compose.with-internal-ca.yaml \
-#     -f test/docker-compose.with-internal-ca.yaml \
+#     -f test-lab/docker-compose.with-internal-ca.yaml \
 #     [--env-file .env-base] [--env-file .env-local] \
 #     --profile with-postgres --profile with-release \
 #     --profile with-keycloak --profile with-nginx \

@@ -11,7 +11,7 @@
 > The split mirrors the compose-file split:
 >
 > - `docker-compose.yaml` (root)         - CORE services (release-assistant, release-mcp, llm-service)
-> - `test/docker-compose.yaml`           - TEST/lab services (keycloak, nginx, postgres, in-stack Release)
+> - `test-lab/docker-compose.yaml`           - TEST/lab services (keycloak, nginx, postgres, in-stack Release)
 >
 > All commands below assume you start from the repository root and pass
 > `--project-directory .` so Compose resolves `extends` paths correctly
@@ -19,10 +19,10 @@
 
 ## 1) Overview
 
-The `test/` directory ships the lab infrastructure that pairs with the
+The `test-lab/` directory ships the lab infrastructure that pairs with the
 CORE compose to give you a fully self-contained end-to-end Ask Release
 stack on a single host. Every lab service is opt-in: nothing in
-`test/` starts until you add its `with-*` profile to a `docker compose`
+`test-lab/` starts until you add its `with-*` profile to a `docker compose`
 command.
 
 | Profile | Service | Use case |
@@ -39,7 +39,7 @@ Combining them:
 docker compose \
   --project-directory . \
   -f docker-compose.yaml \
-  [-f test/docker-compose.yaml] \
+  [-f test-lab/docker-compose.yaml] \
   [-f docker-compose.with-internal-ca.yaml] \
   --profile <profiles> \
   <command>
@@ -52,10 +52,10 @@ and edit per host.
 If you only want to run the test stack (e.g. against an existing
 external Release / postgres), drop `-f docker-compose.yaml`. If you only
 want the core stack (e.g. for production-like deploys against external
-IdP, DB, Release), drop `-f test/docker-compose.yaml`.
+IdP, DB, Release), drop `-f test-lab/docker-compose.yaml`.
 
 Add `-f docker-compose.with-internal-ca.yaml` (and
-`-f test/docker-compose.with-internal-ca.yaml` when the test stack is in
+`-f test-lab/docker-compose.with-internal-ca.yaml` when the test stack is in
 use) only when you need internal corporate CA trust (IdP / Release /
 LLM endpoints whose certs are signed by a private chain). Requires
 `certs/cacerts.jks` and `certs/ca-bundle.pem` at the repo root -
@@ -70,16 +70,16 @@ each managed by the customer), see [README.md §8.1-§8.3](../README.md#8-quick-
 ## 2) Local Keycloak IdP (--profile with-keycloak)
 
 The `with-keycloak` profile starts a local Keycloak container preloaded
-with a development realm (`test/keycloak/data/xl-platform-realm.json`).
+with a development realm (`test-lab/keycloak/data/xl-platform-realm.json`).
 Use this profile when you want to bring up an end-to-end Ask Release
 stack without depending on an external IdP. Requires the TEST compose
-file: `-f docker-compose.yaml -f test/docker-compose.yaml`.
+file: `-f docker-compose.yaml -f test-lab/docker-compose.yaml`.
 
 What the profile activates:
 
 | Service | Container name | Notes |
 |---|---|---|
-| `keycloak` | `ask-release-keycloak` | Local IdP, realm preloaded from `test/keycloak/data/xl-platform-realm.json` |
+| `keycloak` | `ask-release-keycloak` | Local IdP, realm preloaded from `test-lab/keycloak/data/xl-platform-realm.json` |
 
 Other services (`release-assistant`, `release-mcp`, `llm-service-api`,
 `release`) automatically pick up the local Keycloak issuer when their
@@ -104,18 +104,18 @@ Quick start (local Keycloak + local LLM, no Release):
 ```bash
 # Start Keycloak first; other services wait for it to be healthy.
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-keycloak up -d keycloak
 
 # When combining with --profile with-llm-service, run the one-shot DB init
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-keycloak --profile with-llm-service up llm-service-dbinit
 
 # Start the core services; release-assistant picks up OIDC_ISSUER_URI +
 # AI_LLM_BASE_URL from the layered .env.
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-keycloak --profile with-llm-service up -d \
     llm-service-api release-mcp release-assistant
 ```
@@ -124,13 +124,13 @@ Full local lab (Keycloak + Release + LLM + Postgres):
 
 ```bash
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-keycloak --profile with-release --profile with-postgres up -d postgres keycloak
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-keycloak --profile with-release --profile with-postgres --profile with-llm-service up llm-service-dbinit
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-keycloak --profile with-release --profile with-postgres --profile with-llm-service up -d \
     llm-service-api release-mcp release-assistant release
 ```
@@ -139,14 +139,14 @@ Notes:
 
 - Default admin credentials for the local Keycloak are `admin` / `admin`
   (inlined as `${KEYCLOAK_ADMIN_USER:-admin}` /
-  `${KEYCLOAK_ADMIN_PASSWORD:-admin}` in `test/keycloak/compose.yaml`).
+  `${KEYCLOAK_ADMIN_PASSWORD:-admin}` in `test-lab/keycloak/compose.yaml`).
   Override in your layered `.env` for any non-lab use.
 - Keycloak uses an H2 in-memory database by default. To persist data
   across restarts, mount a host volume or external DB and set
   `DB_VENDOR` accordingly.
 - The local Keycloak realm (`xl-platform`) ships with sample users,
   clients, and roles for development. Override by editing
-  `test/keycloak/data/xl-platform-realm.json` or replacing the realm
+  `test-lab/keycloak/data/xl-platform-realm.json` or replacing the realm
   file.
 - `release-assistant` reads `OIDC_ISSUER_URI`, `AI_LLM_BASE_URL`, and
   `AI_LLM_CHAT_MODEL` from env (substituted via `${VAR:default}` in
@@ -158,18 +158,18 @@ Notes:
 ## 3) Local Digital.ai Release (--profile with-release)
 
 When the optional local Release container is started (requires
-`-f test/docker-compose.yaml`):
+`-f test-lab/docker-compose.yaml`):
 
-- `test/release/conf/` is bind-mounted into the release container at
+- `test-lab/release/conf/` is bind-mounted into the release container at
   `/opt/xebialabs/xl-release-server/conf`, overlaying the image's
   default config so the shipped `xl-release.conf` is used instead of
   the image default.
-- The shipped `test/release/default-conf/xl-release.conf.template` is
+- The shipped `test-lab/release/default-conf/xl-release.conf.template` is
   mounted read-only into the image's `default-conf/` path and provides
   the HOCON template the container resolves at startup.
   On first start, the container writes the resolved config into
-  `test/release/conf/xl-release.conf` (under the bind mount). To override
-  defaults, copy the template into `test/release/conf/xl-release.conf`
+  `test-lab/release/conf/xl-release.conf` (under the bind mount). To override
+  defaults, copy the template into `test-lab/release/conf/xl-release.conf`
   and edit it. The template itself covers blocks not exposed via the
   official `xebialabs/xl-release` image environment variables (see
   [Environment variables](https://xebialabs.github.io/xl-docker-images/docs/manual/environment-variables)).
@@ -189,10 +189,10 @@ container, no `envsubst`, no template pre-rendering step is required.
 
 Runtime artifacts (`*.lic`, `*.jceks`, `*.xml`, `*.yaml`, `*.properties`,
 `*.policy`, `*.vm`, `xlr-*.conf`, `xl-release-server.conf`) are excluded
-via `test/release/conf/.gitignore` so they are never committed.
+via `test-lab/release/conf/.gitignore` so they are never committed.
 
 Env vars consumed by the template (defaults shipped via
-`test/release/compose.yaml`):
+`test-lab/release/compose.yaml`):
 
 | Env var | Purpose |
 |---|---|
@@ -205,26 +205,26 @@ client registration). `RELEASE_OIDC_ISSUER` defaults to
 `OIDC_ISSUER_URI` (same IdP realm). `RELEASE_OIDC_KEY_RETRIEVAL_URI`,
 `RELEASE_OIDC_ACCESS_TOKEN_URI`, `RELEASE_OIDC_USER_AUTHORIZATION_URI`,
 and `RELEASE_OIDC_LOGOUT_URI` are derived from `OIDC_ISSUER_URI` via
-the `${VAR:-default}` chain in `test/release/compose.yaml`
+the `${VAR:-default}` chain in `test-lab/release/compose.yaml`
 (Keycloak-style: `${issuer}/protocol/openid-connect/{certs,token,auth,logout}`).
 `RELEASE_OIDC_POST_LOGOUT_REDIRECT_URI` defaults to
 `RELEASE_OIDC_REDIRECT_URI`. Override any of them only if the local
 Release uses a different IdP / client / layout than the Assistant.
 
 Before starting the local Release profile
-(`docker compose -f docker-compose.yaml -f test/docker-compose.yaml --profile with-release ...`):
+(`docker compose -f docker-compose.yaml -f test-lab/docker-compose.yaml --profile with-release ...`):
 
 1. Set the `RELEASE_OIDC_*` and `RELEASE_ASSISTANT_PUBLIC_URL` vars in
    your layered `.env` for your environment.
-2. Drop your `xl-release-license.lic` into `test/release/conf/`
-   (excluded by `test/release/conf/.gitignore`).
+2. Drop your `xl-release-license.lic` into `test-lab/release/conf/`
+   (excluded by `test-lab/release/conf/.gitignore`).
 3. Do not commit real client secrets to `.env` - use a secret manager
    / `docker secrets` in production.
 
 The bind mount overrides the image's default `xl-release.conf`. All
 other configuration comes from the `release` image defaults and the env
 vars in your layered `.env`. To restore a clean config after edits:
-`rm -f test/release/conf/xl-release.conf && docker compose restart release`.
+`rm -f test-lab/release/conf/xl-release.conf && docker compose restart release`.
 
 ## 4) Optional reverse proxy (--profile with-nginx)
 
@@ -233,7 +233,7 @@ proxies the Ask Release services that have a public vhost (Assistant by
 default, plus optionally Release / Keycloak) over HTTPS on a single
 host port (default `:5443`). It is a thin, opinionated replacement for
 the "place a reverse proxy in front" pattern recommended for
-production. Requires `-f test/docker-compose.yaml`.
+production. Requires `-f test-lab/docker-compose.yaml`.
 
 What the profile activates:
 
@@ -243,11 +243,11 @@ What the profile activates:
 
 Required setup before first start:
 
-1. Provide a TLS cert + key. Drop them under `test/nginx/certs/`:
+1. Provide a TLS cert + key. Drop them under `test-lab/nginx/certs/`:
 
    ```text
-   test/nginx/certs/tls.crt    # PEM cert (full chain)
-   test/nginx/certs/tls.key    # matching private key
+   test-lab/nginx/certs/tls.crt    # PEM cert (full chain)
+   test-lab/nginx/certs/tls.key    # matching private key
    ```
 
    The cert MUST cover every vhost hostname the operator wants to serve.
@@ -261,7 +261,7 @@ Required setup before first start:
    ```bash
    SAN="DNS:release.example.digital.ai.local,DNS:release-assistant.example.digital.ai.local,DNS:identity.example.digital.ai.local"
    openssl req -x509 -newkey rsa:2048 -nodes -days 30 \
-       -keyout test/nginx/certs/tls.key -out test/nginx/certs/tls.crt \
+       -keyout test-lab/nginx/certs/tls.key -out test-lab/nginx/certs/tls.crt \
        -subj "/CN=ask-release" \
        -addext "subjectAltName=${SAN}"
    ```
@@ -276,36 +276,36 @@ Required setup before first start:
 
 3. Start the stack with the `with-nginx` profile added to whichever
    deployment mode is in use (always pass
-   `-f docker-compose.yaml -f test/docker-compose.yaml` and
+   `-f docker-compose.yaml -f test-lab/docker-compose.yaml` and
    `--project-directory .`):
 
    ```bash
    # Default mode + nginx ingress (core + test compose, with-llm-service profile)
    docker compose --project-directory . \
-     -f docker-compose.yaml -f test/docker-compose.yaml \
+     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
      --profile with-llm-service --profile with-nginx up llm-service-dbinit
    docker compose --project-directory . \
-     -f docker-compose.yaml -f test/docker-compose.yaml \
+     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
      --profile with-llm-service --profile with-nginx up -d \
        llm-service-api release-mcp release-assistant nginx
 
    # Core-only (no local LLM) + nginx ingress
    docker compose --project-directory . \
-     -f docker-compose.yaml -f test/docker-compose.yaml \
+     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
      --profile with-nginx up -d release-mcp release-assistant nginx
 
    # Full local lab (Keycloak + Release + LLM) + nginx ingress
    docker compose --project-directory . \
-     -f docker-compose.yaml -f test/docker-compose.yaml \
+     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
      --profile with-keycloak --profile with-release --profile with-postgres \
      --profile with-llm-service --profile with-nginx up -d \
      postgres keycloak
    docker compose --project-directory . \
-     -f docker-compose.yaml -f test/docker-compose.yaml \
+     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
      --profile with-keycloak --profile with-release --profile with-postgres \
      --profile with-llm-service --profile with-nginx up llm-service-dbinit
    docker compose --project-directory . \
-     -f docker-compose.yaml -f test/docker-compose.yaml \
+     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
      --profile with-keycloak --profile with-release --profile with-postgres \
      --profile with-llm-service --profile with-nginx up -d \
      llm-service-api release-mcp release-assistant release nginx
@@ -337,7 +337,7 @@ present on the cert.
 The `with-nginx` profile adds an nginx container that terminates TLS in
 front of every Ask Release service. It is a turnkey alternative to
 placing an external load balancer or proxy in front of the stack.
-Lives under `test/nginx/`; requires `-f test/docker-compose.yaml`.
+Lives under `test-lab/nginx/`; requires `-f test-lab/docker-compose.yaml`.
 
 **Architecture:**
 
@@ -354,18 +354,18 @@ bridge, so the nginx proxy does not need to route to them.
 **Activate:**
 
 ```bash
-# 1. Drop TLS cert + key at test/nginx/certs/tls.crt and test/nginx/certs/tls.key
+# 1. Drop TLS cert + key at test-lab/nginx/certs/tls.crt and test-lab/nginx/certs/tls.key
 #    (cert must cover every vhost you intend to serve)
 
 # 2. Add the profile to whichever deployment mode you use, e.g. default mode:
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-llm-service --profile with-nginx up -d \
     llm-service-api release-mcp release-assistant nginx
 
 # 3. Verify
 docker compose --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-nginx ps nginx
 ```
 
@@ -391,8 +391,8 @@ docker compose --project-directory . \
 **Cert format (required):**
 
 ```text
-test/nginx/certs/tls.crt    # full chain (leaf + intermediates) as PEM
-test/nginx/certs/tls.key    # matching private key, PEM
+test-lab/nginx/certs/tls.crt    # full chain (leaf + intermediates) as PEM
+test-lab/nginx/certs/tls.key    # matching private key, PEM
 ```
 
 - Single cert with SANs for every vhost is the typical production pattern.
@@ -423,7 +423,7 @@ vhosts.
    loopback (`127.0.0.1:`) and are only reachable via the docker
    network alias used by nginx.
 2. Pair with the TEST hardening overlay
-   (`test/docker-compose.override.yaml.example`) if running the
+   (`test-lab/docker-compose.override.yaml.example`) if running the
    combined lab stack.
 3. Issue a real cert from your internal CA or a public CA. Pin the
    cert to the configured vhost SANs; do not use the self-signed sample
@@ -453,34 +453,34 @@ openssl s_client -connect <host>:5443 </dev/null | openssl x509 -noout -subject 
 curl -kfsS "https://<assistant-hostname>/actuator/health/liveness"
 
 # Logs
-docker compose -f docker-compose.yaml -f test/docker-compose.yaml logs -f nginx
-tail -f test/nginx/logs/access.log test/nginx/logs/error.log
+docker compose -f docker-compose.yaml -f test-lab/docker-compose.yaml logs -f nginx
+tail -f test-lab/nginx/logs/access.log test-lab/nginx/logs/error.log
 ```
 
 **Troubleshooting:**
 
 | Symptom | Likely cause | First checks |
 |---|---|---|
-| nginx fails to start: `cannot load certificate` | `test/nginx/certs/tls.crt` / `tls.key` missing or unreadable | `ls -l test/nginx/certs/`, `openssl x509 -in test/nginx/certs/tls.crt -noout -subject -issuer` |
-| nginx exits with `BIO_new_file() failed` | key/cert path mismatch or perms | verify `test/nginx/certs/tls.crt` matches the `server_name` and is readable by the `nginx` user (uid 101) |
+| nginx fails to start: `cannot load certificate` | `test-lab/nginx/certs/tls.crt` / `tls.key` missing or unreadable | `ls -l test-lab/nginx/certs/`, `openssl x509 -in test-lab/nginx/certs/tls.crt -noout -subject -issuer` |
+| nginx exits with `BIO_new_file() failed` | key/cert path mismatch or perms | verify `test-lab/nginx/certs/tls.crt` matches the `server_name` and is readable by the `nginx` user (uid 101) |
 | 502 Bad Gateway for a vhost | backend service not started or wrong alias | `docker compose ps`, `docker compose logs <backend>` |
 | Cert subject mismatch warnings | operator served a cert without the requested SAN | reissue cert with all vhost SANs, or set the matching `*_HOSTNAME` env var to one of the cert's SANs |
-| Streaming chat cuts off mid-response | `proxy_buffering on` (the default) buffers SSE; assistant vhost already sets it to `off` | confirm `test/nginx/conf.d/01-assistant.conf` is present and not overridden |
+| Streaming chat cuts off mid-response | `proxy_buffering on` (the default) buffers SSE; assistant vhost already sets it to `off` | confirm `test-lab/nginx/conf.d/01-assistant.conf` is present and not overridden |
 
 ## 6) Test hardening overlay
 
 The CORE compose hardening overlay (`docker-compose.override.yaml.example`)
 covers the production services. The TEST compose has a parallel overlay
-(`test/docker-compose.override.yaml.example`) that applies the same
+(`test-lab/docker-compose.override.yaml.example`) that applies the same
 hardening posture to the test services (release, postgres, keycloak,
 nginx).
 
 **Activate for the TEST compose (only when running combined labs):**
 
 ```bash
-cp test/docker-compose.override.yaml.example test/docker-compose.override.yaml
-docker compose -f docker-compose.yaml -f test/docker-compose.yaml \
-    -f docker-compose.override.yaml -f test/docker-compose.override.yaml up -d
+cp test-lab/docker-compose.override.yaml.example test-lab/docker-compose.override.yaml
+docker compose -f docker-compose.yaml -f test-lab/docker-compose.yaml \
+    -f docker-compose.override.yaml -f test-lab/docker-compose.override.yaml up -d
 ```
 
 **Disable:** delete the matching `*.override.yaml` file.
@@ -627,7 +627,7 @@ for your environment.
 docker compose \
   --project-directory . \
   -f docker-compose.yaml \
-  [-f test/docker-compose.yaml] \
+  [-f test-lab/docker-compose.yaml] \
   [-f docker-compose.with-internal-ca.yaml] \
   --profile <profiles> \
   <command>
@@ -640,7 +640,7 @@ from `.env.base` and edit per host.
 If you only want to run the test stack (e.g. against an existing
 external Release / postgres), drop `-f docker-compose.yaml`. If you
 only want the core stack (e.g. for production-like deploys against
-external IdP, DB, Release), drop `-f test/docker-compose.yaml`.
+external IdP, DB, Release), drop `-f test-lab/docker-compose.yaml`.
 
 Add `-f docker-compose.with-internal-ca.yaml` only when you need
 internal corporate CA trust (IdP / Release / LLM endpoints whose
@@ -699,7 +699,7 @@ Run:
 ```bash
 docker compose \
   --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-release \
   up -d postgres release release-mcp release-assistant
 ```
@@ -714,7 +714,7 @@ Check:
 ```bash
 docker compose \
   --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-release \
   ps
 ```
@@ -725,7 +725,7 @@ Destroy:
 ```bash
 docker compose \
   --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-release \
   down --remove-orphans
 ```
@@ -784,7 +784,7 @@ Self-signed certs for local labs only:
 ```bash
 SAN="DNS:release.example.digital.ai.nginx,DNS:release-assistant.example.digital.ai.nginx,DNS:identity.example.digital.ai.nginx"
 openssl req -x509 -newkey rsa:2048 -nodes -days 30 \
-    -keyout test/nginx/certs/tls.key -out test/nginx/certs/tls.crt \
+    -keyout test-lab/nginx/certs/tls.key -out test-lab/nginx/certs/tls.crt \
     -subj "/CN=ask-release" \
     -addext "subjectAltName=${SAN}"
 ```
@@ -793,7 +793,7 @@ Run:
 ```bash
 docker compose \
   --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-nginx --profile with-release \
   up -d postgres nginx release release-mcp release-assistant
 ```
@@ -808,7 +808,7 @@ Check:
 ```bash
 docker compose \
   --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-nginx --profile with-release \
   ps
 ```
@@ -819,7 +819,7 @@ Destroy:
 ```bash
 docker compose \
   --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-nginx --profile with-release \
   down --remove-orphans
 ```
@@ -885,7 +885,7 @@ Self-signed certs:
 ```bash
 SAN="DNS:release.example.digital.ai.nginx,DNS:release-assistant.example.digital.ai.nginx,DNS:identity.example.digital.ai.nginx"
 openssl req -x509 -newkey rsa:2048 -nodes -days 30 \
-    -keyout test/nginx/certs/tls.key -out test/nginx/certs/tls.crt \
+    -keyout test-lab/nginx/certs/tls.key -out test-lab/nginx/certs/tls.crt \
     -subj "/CN=ask-release" \
     -addext "subjectAltName=${SAN}"
 ```
@@ -894,7 +894,7 @@ Run (note `--profile with-llm-service` to also start the local LLM service):
 ```bash
 docker compose \
   --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-nginx --profile with-release \
   up -d postgres llm-service-api nginx release release-mcp release-assistant
 ```
@@ -909,7 +909,7 @@ Check:
 ```bash
 docker compose \
   --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-nginx --profile with-release \
   ps
 ```
@@ -920,7 +920,7 @@ Destroy:
 ```bash
 docker compose \
   --project-directory . \
-  -f docker-compose.yaml -f test/docker-compose.yaml \
+  -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-nginx --profile with-release \
   down --remove-orphans
 ```
@@ -994,16 +994,16 @@ Self-signed certs:
 ```bash
 SAN="DNS:release.example.digital.ai.nginx,DNS:release-assistant.example.digital.ai.nginx,DNS:identity.example.digital.ai.nginx"
 openssl req -x509 -newkey rsa:2048 -nodes -days 30 \
-    -keyout test/nginx/certs/tls.key -out test/nginx/certs/tls.crt \
+    -keyout test-lab/nginx/certs/tls.key -out test-lab/nginx/certs/tls.crt \
     -subj "/CN=ask-release" \
     -addext "subjectAltName=${SAN}"
 ```
 
 Build JKS and PEM truststore from the nginx self-signed cert (writes
 to `./certs/`, consumed by `-f docker-compose.with-internal-ca.yaml`
-and `-f test/docker-compose.with-internal-ca.yaml`):
+and `-f test-lab/docker-compose.with-internal-ca.yaml`):
 ```bash
-./install-internal-ca.sh test/nginx/certs/tls.crt
+./install-internal-ca.sh test-lab/nginx/certs/tls.crt
 ```
 
 Run:
@@ -1012,8 +1012,8 @@ docker compose \
   --project-directory . \
   -f docker-compose.yaml \
   -f docker-compose.with-internal-ca.yaml \
-  -f test/docker-compose.yaml \
-  -f test/docker-compose.with-internal-ca.yaml \
+  -f test-lab/docker-compose.yaml \
+  -f test-lab/docker-compose.with-internal-ca.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-nginx --profile with-release \
   up -d postgres llm-service-api keycloak nginx release release-mcp release-assistant
 ```
@@ -1024,8 +1024,8 @@ docker compose \
   --project-directory . \
   -f docker-compose.yaml \
   -f docker-compose.with-internal-ca.yaml \
-  -f test/docker-compose.yaml \
-  -f test/docker-compose.with-internal-ca.yaml \
+  -f test-lab/docker-compose.yaml \
+  -f test-lab/docker-compose.with-internal-ca.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-nginx --profile with-release \
   ps
 ```
@@ -1038,8 +1038,8 @@ docker compose \
   --project-directory . \
   -f docker-compose.yaml \
   -f docker-compose.with-internal-ca.yaml \
-  -f test/docker-compose.yaml \
-  -f test/docker-compose.with-internal-ca.yaml \
+  -f test-lab/docker-compose.yaml \
+  -f test-lab/docker-compose.with-internal-ca.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-nginx --profile with-release \
   down --remove-orphans
 ```
@@ -1061,7 +1061,7 @@ assistant/MCP at an existing external Digital.ai Release installation.
 - All commands should be run from the repository root.
 - `--project-directory .` is required when combining the two compose
   files so Compose resolves `extends` paths against the project root.
-- `test/` is gitignored in spirit - keep certs, logs, and the named
+- `test-lab/` is gitignored in spirit - keep certs, logs, and the named
   `ask-release-postgres-data` volume outside source control.
 - See the [README.md](../README.md) for the full deployment, sizing,
   security, and troubleshooting reference.
@@ -1190,7 +1190,7 @@ deployment modes:
 
 These vars are not declared in `.env.base`; their `${VAR:-default}`
 fallbacks live in the per-service test compose file
-(`test/*/compose.yaml`). Override per deployment in `.env`.
+(`test-lab/*/compose.yaml`). Override per deployment in `.env`.
 
 ### Test-stack image tags
 
@@ -1227,14 +1227,14 @@ public FQDNs in `.env` for production.
 | `RELEASE_HOSTNAME` | `release.example.digital.ai.local` | Public FQDN of the Release (used by nginx vhost + TLS cert SAN + Docker network alias) |
 | `IDP_HOSTNAME` | `identity.example.digital.ai.local` | Public FQDN of the IdP (used by nginx vhost + TLS cert SAN + Docker network alias + Keycloak `KC_HOSTNAME`) |
 
-### Compose-internal defaults (`test/keycloak/compose.yaml`)
+### Compose-internal defaults (`test-lab/keycloak/compose.yaml`)
 
 | Variable | Compose default | Description |
 |---|---|---|
 | `KEYCLOAK_ADMIN_USER` | `admin` | Bootstrap admin username (`KC_BOOTSTRAP_ADMIN_USERNAME`) |
 | `KEYCLOAK_ADMIN_PASSWORD` | `admin` | Bootstrap admin password (`KC_BOOTSTRAP_ADMIN_PASSWORD`) |
 
-The realm is preloaded from `test/keycloak/data/xl-platform-realm.json`
+The realm is preloaded from `test-lab/keycloak/data/xl-platform-realm.json`
 and the `KC_HOSTNAME` image env is wired to `${IDP_HOSTNAME}`.
 `KEYCLOAK_REALM` and `KEYCLOAK_LOCAL_ISSUER` (commented template in
 `.env.base`) are not consumed by the local Keycloak container directly -
@@ -1244,7 +1244,7 @@ to point `OIDC_ISSUER_URI`, `MCP_OAUTH_ISSUER`,
 `DAI_AUTH_ISSUER_PATTERN` at when the `with-keycloak` profile is
 active.
 
-### Compose-internal defaults (`test/nginx/compose.yaml`)
+### Compose-internal defaults (`test-lab/nginx/compose.yaml`)
 
 | Variable | Compose default | Description |
 |---|---|---|
@@ -1253,20 +1253,20 @@ active.
 | `NGINX_RELEASE_HOSTNAME` | _(empty)_ | Optional extra network alias for nginx so it is reachable by the Release public FQDN (only with `--profile with-release`) |
 | `NGINX_IDP_HOSTNAME` | _(empty)_ | Optional extra network alias for nginx so it is reachable by the IdP public FQDN (only with `--profile with-keycloak`) |
 
-The vhost configs (`test/nginx/conf.d/*.conf`) reference the
+The vhost configs (`test-lab/nginx/conf.d/*.conf`) reference the
 `ASSISTANT_HOSTNAME`, `RELEASE_HOSTNAME`, and `IDP_HOSTNAME` vars from
 `.env.base` directly. The `NGINX_*_HOSTNAME` vars above only need to be
 set when you want nginx to also be reachable by an alternate FQDN that
 is not on the TLS cert (e.g. for split-DNS behind a corporate LB).
 
-### Compose-internal defaults (`test/postgres/compose.yaml`)
+### Compose-internal defaults (`test-lab/postgres/compose.yaml`)
 
 | Variable | Compose default | Description |
 |---|---|---|
 | `POSTGRES_ADMIN_USER` | `postgres` | Superuser name created on first startup (`POSTGRES_USER`) |
 | `POSTGRES_ADMIN_PASSWORD` | `postgres` | Superuser password created on first startup (`POSTGRES_PASSWORD`) |
 
-### Compose-internal defaults (`test/release/compose.yaml`)
+### Compose-internal defaults (`test-lab/release/compose.yaml`)
 
 #### Release image / admin
 
@@ -1299,7 +1299,7 @@ is not on the TLS cert (e.g. for split-DNS behind a corporate LB).
 | `RELEASE_OIDC_REDIRECT_URI` | `${RELEASE_PUBLIC_URL}/oidc-login` | OIDC redirect URI used by Release (login + post-logout by default) |
 | `RELEASE_OIDC_POST_LOGOUT_REDIRECT_URI` | `${RELEASE_PUBLIC_URL}/oidc-login` | OIDC post-logout redirect URI used by Release |
 
-#### Release HOCON template vars (`test/release/default-conf/xl-release.conf.template`)
+#### Release HOCON template vars (`test-lab/release/default-conf/xl-release.conf.template`)
 
 These are resolved by HOCON `${?VAR}` substitution inside
 `xl-release.conf.template` at Release startup (no init container
@@ -1332,11 +1332,11 @@ active.
 
 | Symptom | Likely cause | First checks |
 |---|---|---|
-| nginx fails to start (`cannot load certificate`) | `test/nginx/certs/tls.crt` / `tls.key` missing or unreadable | `ls -l test/nginx/certs/`, `openssl x509 -in test/nginx/certs/tls.crt -noout -subject -issuer` |
+| nginx fails to start (`cannot load certificate`) | `test-lab/nginx/certs/tls.crt` / `tls.key` missing or unreadable | `ls -l test-lab/nginx/certs/`, `openssl x509 -in test-lab/nginx/certs/tls.crt -noout -subject -issuer` |
 | nginx 502 for a vhost | backend not started under the active profile set, or wrong alias | `docker compose ps`, `docker compose logs <backend>`, confirm the vhost's profile is active |
 | TLS handshake fails for a public FQDN | cert SAN does not include the requested hostname | reissue cert with the FQDN as a SAN, or set the matching `*_HOSTNAME` env var to a SAN you already have |
-| `network ask-release-data declared as external, but could not be found` (or `ask-release-net`) | TEST compose is being used standalone and the shared networks are flagged `external: true` | `git pull` - the fix drops `external: true` from the networks in `test/docker-compose.yaml` so Compose auto-creates them; standalone runs work without first running the CORE compose |
-| `Error response from daemon: error while creating mount source path '.../test/nginx/certs/cacerts.jks': chown ...: permission denied` | Stale directory at `test/nginx/certs/cacerts.jks` from a prior failed run; `test/release/compose.yaml` previously pointed at this path | `rmdir test/nginx/certs/cacerts.jks` (current compose now sources `certs/cacerts.jks` from the repo root, populated by `install-internal-ca.sh`); rerun `./install-internal-ca.sh <corp-ca-bundle.pem>` if `certs/cacerts.jks` is also missing |
+| `network ask-release-data declared as external, but could not be found` (or `ask-release-net`) | TEST compose is being used standalone and the shared networks are flagged `external: true` | `git pull` - the fix drops `external: true` from the networks in `test-lab/docker-compose.yaml` so Compose auto-creates them; standalone runs work without first running the CORE compose |
+| `Error response from daemon: error while creating mount source path '.../test-lab/nginx/certs/cacerts.jks': chown ...: permission denied` | Stale directory at `test-lab/nginx/certs/cacerts.jks` from a prior failed run; `test-lab/release/compose.yaml` previously pointed at this path | `rmdir test-lab/nginx/certs/cacerts.jks` (current compose now sources `certs/cacerts.jks` from the repo root, populated by `install-internal-ca.sh`); rerun `./install-internal-ca.sh <corp-ca-bundle.pem>` if `certs/cacerts.jks` is also missing |
 
 For the CORE-side troubleshooting (Assistant / MCP / LLM service auth,
 DB connectivity, OIDC issuer mismatches), see
@@ -1344,13 +1344,13 @@ DB connectivity, OIDC issuer mismatches), see
 
 ## 14) Notes
 
-- The `test/` directory is intentionally lab-grade. It uses a
+- The `test-lab/` directory is intentionally lab-grade. It uses a
   permissive Keycloak realm, in-memory H2 by default, and
   in-container bind mounts for certs and logs. Do not use the lab
   stack as-is in production.
 - Every lab profile is opt-in; the CORE compose starts the
   release-assistant, release-mcp, and (with `--profile with-llm-service`)
-  llm-service-api without needing any of `test/`.
+  llm-service-api without needing any of `test-lab/`.
 - The two compose files use shared network and volume names so the
   combined CORE + TEST stack resolves to a single set of resources.
   Standalone runs of either compose also work because Compose

@@ -1,8 +1,8 @@
 # ----------------------------------------------------------------------------
 # Ask Release Docker - opt-in hardening overlay (TEST services)
 #
-# Activate by copying this file to test/docker-compose.override.yaml:
-#   cp test/docker-compose.override.yaml.example test/docker-compose.override.yaml
+# Activate by copying this file to test-lab/docker-compose.override.yaml:
+#   cp test-lab/docker-compose.override.yaml.example test-lab/docker-compose.override.yaml
 #
 # Compose auto-merges docker-compose.override.yaml with docker-compose.yaml.
 # To disable, simply delete the override file.
@@ -13,7 +13,7 @@
 #   - Removes the postgres host port entirely (postgres becomes internal-only)
 #
 # Use this when running the combined local-lab stack with
-# `-f docker-compose.yaml -f test/docker-compose.yaml`. The test stack runs
+# `-f docker-compose.yaml -f test-lab/docker-compose.yaml`. The test stack runs
 # the in-stack Keycloak, nginx, postgres, and (optionally) Digital.ai Release
 # containers; it is sized for single-host dev/lab usage, not production.
 # ----------------------------------------------------------------------------

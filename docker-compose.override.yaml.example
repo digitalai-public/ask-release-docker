@@ -15,7 +15,7 @@
 # This overlay only covers the CORE services (release-assistant, release-mcp,
 # llm-service-api). Test-stack services (keycloak, nginx, postgres, release)
 # are local-lab infrastructure and are hardened through
-# test/docker-compose.override.yaml.example instead.
+# test-lab/docker-compose.override.yaml.example instead.
 #
 # To customize per-tier sizing, edit the per-service cpus/mem_limit values.
 # For large tier, multiply these by 4x.

@@ -35,7 +35,7 @@ services:
       RELEASE_OIDC_LOGOUT_URI: ${RELEASE_OIDC_LOGOUT_URI:-${OIDC_ISSUER_URI}/protocol/openid-connect/logout}
       RELEASE_OIDC_REDIRECT_URI: ${RELEASE_OIDC_REDIRECT_URI:-${RELEASE_PUBLIC_URL}/oidc-login}
       RELEASE_OIDC_POST_LOGOUT_REDIRECT_URI: ${RELEASE_OIDC_POST_LOGOUT_REDIRECT_URI:-${RELEASE_PUBLIC_URL}/oidc-login}
-      # JAVA_TOOL_OPTIONS is added by test/docker-compose.with-internal-ca.yaml
+      # JAVA_TOOL_OPTIONS is added by test-lab/docker-compose.with-internal-ca.yaml
       # when the operator needs internal-CA trust on this service. See README.md
       # §28.3 for the activation procedure.
     volumes:
@@ -43,7 +43,7 @@ services:
       - ./conf:/opt/xebialabs/xl-release-server/conf
       - ./logs:/opt/xebialabs/xl-release-server/logs:rw
       # ../../certs/cacerts.jks and ../../certs/ca-bundle.pem are mounted by
-      # test/docker-compose.with-internal-ca.yaml when internal-CA trust is
+      # test-lab/docker-compose.with-internal-ca.yaml when internal-CA trust is
       # needed. See README.md §28.3.
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5516/s/actuator/health/liveness"]

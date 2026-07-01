@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# Ask Release Docker - test/lab infrastructure
+# Ask Release Docker - test-lab/lab infrastructure
 #
 # This compose file bundles every support service that exists only for local
 # labs and end-to-end testing:
@@ -26,7 +26,7 @@
 #   docker compose \
 #     --project-directory . \
 #     -f docker-compose.yaml \
-#     -f test/docker-compose.yaml \
+#     -f test-lab/docker-compose.yaml \
 #     --profile with-postgres --profile with-release \
 #     --profile with-keycloak --profile with-nginx \
 #     --profile with-llm-service \
@@ -43,13 +43,13 @@ services:
   keycloak:
     profiles: ["with-keycloak"]
     extends:
-      file: test/keycloak/compose.yaml
+      file: test-lab/keycloak/compose.yaml
       service: keycloak
 
   nginx:
     profiles: ["with-nginx"]
     extends:
-      file: test/nginx/compose.yaml
+      file: test-lab/nginx/compose.yaml
       service: nginx
     # No `depends_on` for backends here: nginx is part of the TEST compose
     # and the backends (release-assistant, release-mcp, llm-service-api,
@@ -59,19 +59,19 @@ services:
     # the TEST compose with the CORE compose:
     #   docker compose \
     #     --project-directory . \
-    #     -f docker-compose.yaml -f test/docker-compose.yaml \
+    #     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
     #     --profile with-nginx ... up -d
 
   postgres:
     profiles: ["with-postgres"]
     extends:
-      file: test/postgres/compose.yaml
+      file: test-lab/postgres/compose.yaml
       service: postgres
 
   release:
     profiles: ["with-release"]
     extends:
-      file: test/release/compose.yaml
+      file: test-lab/release/compose.yaml
       service: release
 
 volumes:
