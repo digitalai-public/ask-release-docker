@@ -167,11 +167,10 @@ When the optional local Release container is started (requires
 - The shipped `test/release/default-conf/xl-release.conf.template` is
   mounted read-only into the image's `default-conf/` path and provides
   the HOCON template the container resolves at startup.
-  `test/release/conf/xl-release.conf` is the active copy of that
-  template that Release loads from
-  `/opt/xebialabs/xl-release-server/conf`; edit this file (or drop a
-  different `xl-release.conf` into `test/release/conf/`) to override
-  defaults. The template itself covers blocks not exposed via the
+  On first start, the container writes the resolved config into
+  `test/release/conf/xl-release.conf` (under the bind mount). To override
+  defaults, copy the template into `test/release/conf/xl-release.conf`
+  and edit it. The template itself covers blocks not exposed via the
   official `xebialabs/xl-release` image environment variables (see
   [Environment variables](https://xebialabs.github.io/xl-docker-images/docs/manual/environment-variables)).
 
