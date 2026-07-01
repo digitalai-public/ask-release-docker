@@ -258,13 +258,19 @@ Required setup before first start:
 
    Quick self-signed example for local labs only:
 
-   ```bash
-   SAN="DNS:release.example.digital.ai.local,DNS:release-assistant.example.digital.ai.local,DNS:identity.example.digital.ai.local"
-   openssl req -x509 -newkey rsa:2048 -nodes -days 30 \
-       -keyout test-lab/nginx/certs/tls.key -out test-lab/nginx/certs/tls.crt \
-       -subj "/CN=ask-release" \
-       -addext "subjectAltName=${SAN}"
-   ```
+    ```bash
+    SAN="DNS:release.example.digital.ai.local,DNS:release-assistant.example.digital.ai.local,DNS:identity.example.digital.ai.local"
+    openssl req -x509 -newkey rsa:2048 -nodes -days 30 \
+        -keyout test-lab/nginx/certs/tls.key -out test-lab/nginx/certs/tls.crt \
+        -subj "/CN=ask-release" \
+        -addext "subjectAltName=${SAN}"
+    ```
+
+   **Important (self-signed certs in local lab):** browsers do not trust
+   self-signed certs by default. On first access, open the HTTPS URL for
+   each exposed vhost (Assistant, and Release/IdP if enabled) and accept
+   the certificate warning in the browser to proceed. Use this only for
+   local test-lab environments.
 
 2. Optionally set the public FQDNs in `.env`:
 
