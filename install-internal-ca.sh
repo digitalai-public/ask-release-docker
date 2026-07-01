@@ -131,13 +131,8 @@ keytool -list -keystore "${JKS}" -storepass "${JKS_PASS}" \
     || { err "JKS does not contain alias ${ALIAS}"; exit 1; }
 log "${JKS} loaded and contains alias ${ALIAS}"
 
-# --- 4) tighten file permissions ---------------------------------------------
-# The JKS holds the operator's private CA chain; the PEM carries the same
-# material in plaintext. 0600 keeps both readable only by the operator that
-# generated them, matching the posture of /etc/ssl/corp-ca-bundle.pem on a
-# hardened host.
-chmod 0600 "${JKS}" "${PEM}"
-log "set 0600 permissions on ${JKS} and ${PEM}"
+chmod 0644 "${JKS}" "${PEM}"
+log "set 0644 permissions on ${JKS} and ${PEM}"
 
 log "done. activate the internal-CA trust overlay on your next docker compose run:"
 log "  # CORE-only stack (release-assistant, release-mcp, llm-service-api)"
