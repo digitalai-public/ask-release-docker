@@ -17,7 +17,7 @@ spring:
 
   # Database Configuration (Required)
   datasource:
-    url: jdbc:${DB_URL_SUFFIX:}?sslMode=ALLOW
+    url: jdbc:${DB_URL_SUFFIX:}
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
 
