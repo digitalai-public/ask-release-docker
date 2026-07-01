@@ -1,0 +1,11 @@
+{
+   "type": "anthropic",
+   "config": {
+     "api_key": "sk...",
+     "base_url": "replace-me",
+     "max_retries": 2,
+     "default_headers": null,
+     "anthropic_proxy": null,
+     "timeout": null
+   }
+}

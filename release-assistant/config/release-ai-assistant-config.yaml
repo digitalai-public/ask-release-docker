@@ -1,0 +1,215 @@
+# ----------------------------------------------------------------------------
+# Digital.ai Release AI Assistant - Complete Configuration
+# Mirrors k8s-resources/release-assistant/base/release-ai-assistant-configmap.yaml
+# Mounted by release-assistant/compose.yaml at /app/config/release-ai-assistant-config.yaml
+#
+# All `${VAR:default}` placeholders are resolved from the container environment
+# at startup (see release-assistant/compose.yaml `environment:` block).
+#
+# For local LLM Service mode, override:
+#   ai.llm.base-url:  http://llm-service-api:9000
+#   ai.llm.chat.model: <model name returned by the local LLM service>
+# ----------------------------------------------------------------------------
+
+spring:
+  application:
+    name: dai-release-assistant-integration
+
+  # Database Configuration (Required)
+  datasource:
+    url: jdbc:${DB_URL_SUFFIX:}?sslMode=ALLOW
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
+
+  # Security Configuration (Required for JWT authentication)
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER_URI:}
+          principal-claim-name: preferred_username
+          authorities-claim-name: realm_access.roles
+          authority-prefix: ROLE_
+          # Optional: Override JWK set URI if needed
+          jwk-set-uri: ${OIDC_JWK_SET_URI}
+
+      client:
+        provider:
+          dai-identity-platform:
+            issuer-uri: ${OIDC_ISSUER_URI:}
+
+        registration:
+          # Security: for getting tokens used when calling MCP tools (obtain tokens on behalf of end-users using Token Exchange)
+          token-auth-server:
+            client-id: ${OAUTH2_TOKEN_CLIENT_ID:}
+            client-secret: ${OAUTH2_TOKEN_CLIENT_SECRET:}
+            authorization-grant-type: urn:ietf:params:oauth:grant-type:token-exchange
+            provider: dai-identity-platform
+            scope: ${OAUTH2_SCOPES}
+          # OAuth2 login for Vaadin UI
+          ui-auth-server:
+            client-id: ${OAUTH2_TOKEN_CLIENT_ID:}
+            client-secret: ${OAUTH2_TOKEN_CLIENT_SECRET:}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            provider: dai-identity-platform
+            scope:
+              - openid
+              - profile
+              - email
+              - dai-svc
+
+  # AI Configuration (Required - choose your AI providers)
+  ai:
+    # Default model selection (Required)
+    # Set AI_MODEL_CHAT to one of: openai, anthropic, llm
+    model:
+      chat: ${AI_MODEL_CHAT:llm}
+
+    llm:
+      # AI_LLM_BASE_URL defaults to the Digital.ai SaaS LLM endpoint.
+      # Override to the local LLM service URL when running with --profile with-llm-service
+      # (e.g. http://llm-service-api:9000) or to any approved external gateway.
+      base-url: ${AI_LLM_BASE_URL:https://api.staging.digital.ai/llm}
+      chat:
+        model: ${AI_LLM_CHAT_MODEL:anthropic.claude-sonnet-4-6}
+        temperature: ${AI_LLM_CHAT_TEMPERATURE:0.3}
+        stream-options:
+          include-usage: true
+        max-tokens: ${AI_LLM_CHAT_MAX_TOKENS:4096}
+        custom-headers:
+          X-Digitalai-AppName: release/integration
+
+    # MCP Server Configuration (Configure your MCP servers)
+    mcp:
+      client:
+        type: sync
+        request-timeout: 20s
+        initialized: false
+        streamable-http:
+          connections:
+            # Digital.ai Release MCP Server
+            dai-release:
+              url: ${RELEASE_MCP_SERVER_URL:}
+
+# Application Configuration
+app:
+  # Vaadin admin UI
+  ui:
+    enabled: true
+  environment: integration
+  # CORS Configuration (Required - configure for your frontend domains)
+  cors:
+    allowed-origins:
+      - ${RELEASE_BASE_URL:}
+    allowed-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+  # Optional: Override default rate limiting
+  rate-limit:
+    requests-per-minute: 120
+    burst-capacity: 20
+
+  # Optional: Override exception handling for your environment
+  exception:
+    include-details: true
+    include-stacktrace: false
+    max-stacktrace-lines: 10
+
+  # Optional: Override security settings
+  security:
+    admin-role-name: account-admin
+    audit-log-enabled: true
+    mask-sensitive-data: true
+
+  # Optional: Enable debug features (not recommended for production)
+  debug:
+    verbose-errors: false
+
+# Optional: Override server settings
+server:
+  port: 8090
+
+# Optional: Override logging levels
+logging:
+  level:
+    assistant-core: INFO
+    assistant-ai: INFO
+    assistant-streaming: INFO
+    assistant-security: INFO
+    assistant-persistence: INFO
+    assistant-ratelimit: INFO
+    spring-ai: INFO
+    spring-ai-advisors: WARN
+    spring-ai-mcp: INFO
+    spring-security: WARN
+    spring-oauth2: WARN
+    sql: WARN
+    http-client: WARN
+    liquibase: INFO
+    hikari: INFO
+    otlp: WARN
+
+# Optional: Override management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+  opentelemetry:
+    resource-attributes:
+      service.name: ${OTEL_SERVICE_NAME:${spring.application.name}}
+      service.namespace: ${OTEL_SERVICE_NAMESPACE:release-integration}
+      service.version: ${OTEL_SERVICE_VERSION:${build.version:unknown}}
+      service.instance.id: ${OTEL_SERVICE_INSTANCE_ID:${HOSTNAME:${random.uuid}}}
+      deployment.environment: ${app.environment}
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:}
+    logging:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:}
+
+  tracing:
+    export:
+      otlp:
+        enabled: ${OTEL_TRACING_EXPORT_OTLP_ENABLED:false}
+      enabled: ${OTEL_TRACING_EXPORT_ENABLED:false}
+    sampling:
+      probability: 1.0
+
+  logging:
+    export:
+      otlp:
+        enabled: ${OTEL_LOGGING_EXPORT_OTLP_ENABLED:false}
+
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTEL_METRICS_EXPORT_OTLP_ENABLED:false}
+        url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:}
+
+# DO NOT ENABLE SWAGGER UI IN PRODUCTION ENVIRONMENTS
+springdoc:
+  swagger-ui:
+    oauth-flow:
+      authorizationUrl: ${OIDC_AUTH_URI:}
+      tokenUrl: ${OIDC_TOKEN_URI:}
+    oauth:
+      client-id: ${OAUTH2_TOKEN_CLIENT_ID:}
+      client-secret: ${OAUTH2_TOKEN_CLIENT_SECRET:}
+      use-pkce-with-authorization-code-grant: true
+      scopes: ${OAUTH2_SCOPES}
+      realm: intelligence-devops
+    enabled: true
+  show-actuator: true
+  api-docs:
+    enabled: true

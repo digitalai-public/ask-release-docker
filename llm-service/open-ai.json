@@ -1,0 +1,10 @@
+{
+   "type": "openai",
+   "config": {
+     "api_key": "sk...",
+     "organization": "replace-me",
+     "project": "replace-me",
+     "webhook_secret": null,
+     "websocket_base_url": null
+   }
+}

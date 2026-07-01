@@ -1,0 +1,59 @@
+services:
+  release:
+    image: ${RELEASE_IMAGE}
+    container_name: ask-release
+    restart: unless-stopped
+    hostname: release
+    profiles: ["with-release"]
+    ports:
+      - "${RELEASE_HTTP_PORT:-5516}:5516"
+    environment:
+      SERVER_URL: ${RELEASE_PUBLIC_URL}
+      ACCEPT_EULA: "Y"
+      FORCE_UPGRADE: "true"
+      ADMIN_PASSWORD: ${RELEASE_ADMIN_PASSWORD:-admin}
+      GENERATE_XL_CONFIG: "true"
+      XL_DB_URL: ${XL_DB_URL:-jdbc:postgresql://${POSTGRES_HOSTNAME}:${POSTGRES_PORT}/xlrelease?ssl=false}
+      XL_DB_USERNAME: ${XL_DB_USERNAME:-xlrelease}
+      XL_DB_PASSWORD: ${XL_DB_PASSWORD:-xlrelease}
+      XL_REPORT_DB_URL: ${XL_REPORT_DB_URL:-jdbc:postgresql://${POSTGRES_HOSTNAME}:${POSTGRES_PORT}/xlarchive?ssl=false}
+      XL_REPORT_DB_USERNAME: ${XL_REPORT_DB_USERNAME:-xlarchive}
+      XL_REPORT_DB_PASSWORD: ${XL_REPORT_DB_PASSWORD:-xlarchive}
+      LOGBACK_SCAN_ENABLED: "true"
+      LOGBACK_SCAN_PERIOD: 30seconds
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
+      RELEASE_ASSISTANT_URL: ${RELEASE_ASSISTANT_PUBLIC_URL}
+      RELEASE_OIDC_CLIENT_ID: ${RELEASE_OIDC_CLIENT_ID:-${OAUTH2_TOKEN_CLIENT_ID}}
+      RELEASE_OIDC_CLIENT_SECRET: ${RELEASE_OIDC_CLIENT_SECRET:-${OAUTH2_TOKEN_CLIENT_SECRET}}
+      RELEASE_OIDC_SCOPES: ${RELEASE_OIDC_SCOPES:-${OAUTH2_SCOPES:-openid}}
+      RELEASE_OIDC_ISSUER: ${RELEASE_OIDC_ISSUER:-${OIDC_ISSUER_URI}}
+      RELEASE_OIDC_KEY_RETRIEVAL_URI: ${RELEASE_OIDC_KEY_RETRIEVAL_URI:-${OIDC_ISSUER_URI}/protocol/openid-connect/certs}
+      RELEASE_OIDC_ACCESS_TOKEN_URI: ${RELEASE_OIDC_ACCESS_TOKEN_URI:-${OIDC_ISSUER_URI}/protocol/openid-connect/token}
+      RELEASE_OIDC_USER_AUTHORIZATION_URI: ${RELEASE_OIDC_USER_AUTHORIZATION_URI:-${OIDC_ISSUER_URI}/protocol/openid-connect/auth}
+      RELEASE_OIDC_LOGOUT_URI: ${RELEASE_OIDC_LOGOUT_URI:-${OIDC_ISSUER_URI}/protocol/openid-connect/logout}
+      RELEASE_OIDC_REDIRECT_URI: ${RELEASE_OIDC_REDIRECT_URI:-${RELEASE_PUBLIC_URL}/oidc-login}
+      RELEASE_OIDC_POST_LOGOUT_REDIRECT_URI: ${RELEASE_OIDC_POST_LOGOUT_REDIRECT_URI:-${RELEASE_PUBLIC_URL}/oidc-login}
+      # JAVA_TOOL_OPTIONS is added by test/docker-compose.with-internal-ca.yaml
+      # when the operator needs internal-CA trust on this service. See README.md
+      # §28.3 for the activation procedure.
+    volumes:
+      - ./default-conf/xl-release.conf.template:/opt/xebialabs/xl-release-server/default-conf/xl-release.conf.template:ro
+      - ./conf:/opt/xebialabs/xl-release-server/conf
+      - ./logs:/opt/xebialabs/xl-release-server/logs:rw
+      # ../../certs/cacerts.jks and ../../certs/ca-bundle.pem are mounted by
+      # test/docker-compose.with-internal-ca.yaml when internal-CA trust is
+      # needed. See README.md §28.3.
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5516/s/actuator/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    networks:
+      ask-release-net:
+        aliases:
+          - release
+          - ${RELEASE_HOSTNAME:-release.example.digital.ai.local}
+      ask-release-data:
