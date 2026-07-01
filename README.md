@@ -240,7 +240,7 @@ Scaling considerations:
 │   │   │   └── xl-release.conf.template            # read-only HOCON template mounted into the image default-conf path
 │   │   ├── conf/                                   # bind-mounted into the container for runtime overrides + license
 │   │   │   ├── .gitignore                          # excludes license/keystore/other runtime artifacts
-│   │   │   ├── xl-release.conf                     # active HOCON config (matches template; copy here to override)
+│   │   │   ├── xl-release.conf                     # active HOCON config (create by copying the template into conf/; typically not committed)
 │   │   │   ├── xl-release-license.lic              # local Release license (gitignored)
 │   │   │   └── ...                                 # other image-default config files (wrapper, logback, etc.)
 │   │   └── logs/                                   # runtime Release logs (gitignored)
