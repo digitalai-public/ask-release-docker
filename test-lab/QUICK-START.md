@@ -1,0 +1,154 @@
+# Quick Start - Full local HTTP lab (with-llm, with-postgres, with-release, with-keycloak)
+
+This is the fastest installation path for a full local lab stack over HTTP
+(no nginx profile, no TLS setup). It is designed for local functional testing.
+
+What this setup gives you:
+
+- local PostgreSQL (`with-postgres`)
+- local LLM service (`with-llm-service`)
+- local Release (`with-release`)
+- local Keycloak (`with-keycloak`)
+
+What we are intentionally not using here:
+
+- no nginx ingress (`with-nginx` is not enabled)
+- no HTTPS certificates
+- no internal-CA overlays
+
+How traffic flows in this quick start:
+
+- browser -> `http://release.example.digital.ai.local:5516`
+- Release -> Assistant (`RELEASE_ASSISTANT_PUBLIC_URL`)
+- Assistant -> MCP -> Release (internal docker network)
+- Assistant -> local LLM service (`http://llm-service-api:9000/llm`)
+- OIDC auth -> local Keycloak over HTTP on `:5080`
+
+## 1) Prepare hostnames
+
+Add to `/etc/hosts` (or Windows hosts file):
+
+```text
+127.0.0.1       release.example.digital.ai.local
+127.0.0.1       release-assistant.example.digital.ai.local
+127.0.0.1       identity.example.digital.ai.local
+```
+
+## 2) Create local env file
+
+From repository root:
+
+```bash
+cp .env.base .env
+```
+
+Set or update these values in `.env`:
+
+```bash
+OAUTH2_SCOPES="openid"
+OAUTH2_TOKEN_CLIENT_ID=xl-release
+OAUTH2_TOKEN_CLIENT_SECRET=ab2088f6-2251-4233-9b22-e24db6a67483
+
+POSTGRES_HOSTNAME=postgres
+ASSISTANT_HOSTNAME=release-assistant.example.digital.ai.local
+RELEASE_HOSTNAME=release.example.digital.ai.local
+IDP_HOSTNAME=identity.example.digital.ai.local
+
+RELEASE_PUBLIC_URL=http://${RELEASE_HOSTNAME}:${RELEASE_HTTP_PORT}
+RELEASE_ASSISTANT_PUBLIC_URL=http://${ASSISTANT_HOSTNAME}:${ASSISTANT_PORT}
+
+KEYCLOAK_REALM=xl-platform
+KEYCLOAK_LOCAL_ISSUER=http://${IDP_HOSTNAME}:${KEYCLOAK_HTTP_PORT}/realms/${KEYCLOAK_REALM}
+OIDC_ISSUER_URI=${KEYCLOAK_LOCAL_ISSUER}
+MCP_OAUTH_ISSUER=${KEYCLOAK_LOCAL_ISSUER}
+MCP_OAUTH_JWKS_URL=${OIDC_ISSUER_URI}/protocol/openid-connect/certs
+
+MCP_VERIFY_SSL=false
+
+AI_LLM_BASE_URL=http://llm-service-api:${LLM_SERVICE_PORT}/llm
+AI_LLM_CHAT_MODEL=replace-me
+
+DAI_ACCOUNT_ID=replace-me
+DAI_AUTH_ISSUER_PATTERN=${OIDC_ISSUER_URI}
+LLM_SERVICE_DEFAULT_PROVIDER_CONFIG=replace-me-base64
+```
+
+Why these values matter:
+
+- `RELEASE_PUBLIC_URL` and `RELEASE_ASSISTANT_PUBLIC_URL` keep Release and Assistant links consistent for browser access.
+- `KEYCLOAK_LOCAL_ISSUER` / `OIDC_ISSUER_URI` point all auth validation to local Keycloak.
+- `AI_LLM_BASE_URL` switches Assistant to the in-stack LLM service.
+- `DAI_*` and `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` are required by the LLM service tenant/provider bootstrap.
+
+## 3) Start infrastructure services first
+
+We start stateful dependencies first (Postgres + Keycloak), then continue with
+db initialization and app services.
+
+```bash
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  up -d postgres keycloak
+```
+
+## 4) Run one-time LLM DB init
+
+`llm-service-dbinit` applies schema migrations and seed/provider bootstrap, then exits.
+
+```bash
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  up llm-service-dbinit
+```
+
+## 5) Start application services
+
+Now start Release, MCP, Assistant, and the LLM API.
+
+```bash
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  up -d llm-service-api release release-mcp release-assistant
+```
+
+## 6) Verify
+
+Check container status:
+
+```bash
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  ps
+```
+
+Check health endpoints:
+
+```bash
+curl -fsS "http://localhost:${RELEASE_HTTP_PORT:-5516}/s/actuator/health/liveness"
+curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness"
+curl -fsS "http://localhost:${MCP_PORT:-8000}/utility/healthcheck"
+curl -fsS "http://localhost:${LLM_SERVICE_PORT:-9000}/llm/utility/ping"
+curl -fsS "http://localhost:${KEYCLOAK_HTTP_PORT:-5080}/health/ready"
+```
+
+Open:
+
+`http://release.example.digital.ai.local:5516/`
+
+## 7) Tear down
+
+```bash
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  down --remove-orphans
+```

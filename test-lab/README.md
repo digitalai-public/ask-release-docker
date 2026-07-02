@@ -67,6 +67,10 @@ stores.
 For the production deployment paths (external Postgres / Release / IdP
 each managed by the customer), see [README.md §8.1-§8.3](../README.md#8-quick-start).
 
+For a shorter guided install of the full local HTTP lab stack
+(`with-llm-service`, `with-postgres`, `with-release`, `with-keycloak`),
+see [QUICK-START.md](QUICK-START.md).
+
 ## 2) Local Keycloak IdP (--profile with-keycloak)
 
 The `with-keycloak` profile starts a local Keycloak container preloaded
