@@ -143,7 +143,38 @@ Open:
 
 `http://release.example.digital.ai.local:5516/`
 
-## 7) Tear down
+## 7) Read logs from all running containers
+
+Use the same compose file set and profiles to stream logs for every active
+service in this quick-start stack:
+
+```bash
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  logs -f
+```
+
+Useful variants:
+
+```bash
+# Last 200 lines from all services (no follow)
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  logs --tail=200
+
+# Follow logs for a subset of services
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  logs -f release release-assistant release-mcp llm-service-api keycloak postgres
+```
+
+## 8) Tear down
 
 ```bash
 docker compose --project-directory . \
