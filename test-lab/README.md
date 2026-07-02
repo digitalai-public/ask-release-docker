@@ -139,6 +139,9 @@ docker compose --project-directory . \
     llm-service-api release-mcp release-assistant release
 ```
 
+First login suggestion: use `gandalf/gandalf` (admin-like roles) or
+`alice/alice` (developer-role testing).
+
 Notes:
 
 - Default admin credentials for the local Keycloak are `admin` / `admin`
@@ -158,6 +161,33 @@ Notes:
   Defaults target the Digital.ai SaaS LLM endpoint, so override those
   two vars in your `.env` whenever you want to hit a different endpoint
   (local LLM service, external gateway, etc.).
+
+### 2.1 Default Keycloak login users (preloaded)
+
+When `with-keycloak` is enabled, the `xl-platform` realm is imported from
+`test-lab/keycloak/data/xl-platform-realm.json` and ships with preloaded
+test users. In this lab setup, each user password equals the username.
+
+| Username | Password |
+|---|---|
+| `alice` | `alice` |
+| `bilbo` | `bilbo` |
+| `bob` | `bob` |
+| `carol` | `carol` |
+| `elrond` | `elrond` |
+| `eve` | `eve` |
+| `frodo` | `frodo` |
+| `gandalf` | `gandalf` |
+| `root` | `root` |
+| `sauron` | `sauron` |
+
+Recommended demo users:
+
+- `gandalf/gandalf` for admin-like role testing
+- `alice/alice` for developer-role testing
+
+Lab-only warning: these credentials are for local testing only and must not
+be used in shared, staging, or production environments.
 
 ## 3) Local Digital.ai Release (--profile with-release)
 
@@ -314,12 +344,15 @@ Required setup before first start:
      -f docker-compose.yaml -f test-lab/docker-compose.yaml \
      --profile with-keycloak --profile with-release --profile with-postgres \
      --profile with-llm-service --profile with-nginx up llm-service-dbinit
-   docker compose --project-directory . \
-     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
-     --profile with-keycloak --profile with-release --profile with-postgres \
-     --profile with-llm-service --profile with-nginx up -d \
-     llm-service-api release-mcp release-assistant release nginx
-   ```
+    docker compose --project-directory . \
+      -f docker-compose.yaml -f test-lab/docker-compose.yaml \
+      --profile with-keycloak --profile with-release --profile with-postgres \
+      --profile with-llm-service --profile with-nginx up -d \
+      llm-service-api release-mcp release-assistant release nginx
+    ```
+
+First login suggestion when local Keycloak is active: `gandalf/gandalf`
+or `alice/alice` (see §2.1).
 
 4. Verify:
 
@@ -825,6 +858,9 @@ docker compose \
 
 Open `https://release.example.digital.ai.nginx:5443/`
 
+First login suggestion: use `gandalf/gandalf` (admin-like) or
+`alice/alice` (developer-role testing), see §2.1.
+
 Destroy:
 ```bash
 docker compose \
@@ -1060,11 +1096,16 @@ Same as recipe 8.4 but drop `--profile with-postgres` and set
 `POSTGRES_HOSTNAME=<your-managed-postgres-host>` in `.env` when you
 want to use a customer-managed PostgreSQL.
 
+First login suggestion: use `gandalf/gandalf` or `alice/alice` (see §2.1).
+
 ### 8.6 https, with-llm, with-postgres, with-keycloak (no in-stack Release)
 
 Same as recipe 8.4 but drop `--profile with-release` (and the
 `release` service from the `up -d` list) when you want to point the
 assistant/MCP at an existing external Digital.ai Release installation.
+
+First login suggestion when local Keycloak is in use: `gandalf/gandalf`
+or `alice/alice` (see §2.1).
 
 ### Notes
 

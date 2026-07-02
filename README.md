@@ -10,7 +10,7 @@ This repository ships two documents, one compose stack each:
 |---|---|---|
 | `README.md` (this file) | **Production deployment** of the CORE services. External Postgres, Release, IdP, LLM endpoint. Secure connectivity, sizing, RBAC, backup/DR, monitoring, private-CA trust. | `docker-compose.yaml` (root) |
 | [test-lab/README.md](test-lab/README.md) | **Lab / local-stack deployment**. Local Keycloak, local Digital.ai Release, local PostgreSQL, optional nginx reverse proxy, lab setup recipes, troubleshooting for lab-only issues. | `test-lab/docker-compose.yaml` |
-| [test-lab/QUICK-START.md](test-lab/QUICK-START.md) | **Guided quick install** for the full local HTTP lab stack (`with-llm-service`, `with-postgres`, `with-release`, `with-keycloak`) with step-by-step explanation. | `docker-compose.yaml` + `test-lab/docker-compose.yaml` |
+| [test-lab/QUICK-START.md](test-lab/QUICK-START.md) | **Guided quick install** for the full local HTTP lab stack (`with-llm-service`, `with-postgres`, `with-release`, `with-keycloak`) with step-by-step explanation, plus preloaded local Keycloak test-user credentials. | `docker-compose.yaml` + `test-lab/docker-compose.yaml` |
 
 The split mirrors the compose-file split: the CORE compose (`docker-compose.yaml`)
 ships the three production services (release-assistant, release-mcp,

@@ -143,6 +143,10 @@ Open:
 
 `http://release.example.digital.ai.local:5516/`
 
+First login suggestion: use `gandalf/gandalf` (admin-like) or
+`alice/alice` (developer-role testing). Full credential list:
+`test-lab/README.md` section `2.1`.
+
 ## 7) Read logs from all running containers
 
 Use the same compose file set and profiles to stream logs for every active
