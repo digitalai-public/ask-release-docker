@@ -10,7 +10,7 @@
 >
 > The split mirrors the compose-file split:
 >
-> - `docker-compose.yaml` (root)         - CORE services (release-assistant, release-mcp, llm-service)
+> - `docker-compose.yaml` (root)         - CORE services (release-assistant, llm-service)
 > - `test-lab/docker-compose.yaml`           - TEST/lab services (keycloak, nginx, postgres, in-stack Release)
 >
 > All commands below assume you start from the repository root and pass
@@ -85,17 +85,16 @@ What the profile activates:
 |---|---|---|
 | `keycloak` | `ask-release-keycloak` | Local IdP, realm preloaded from `test-lab/keycloak/data/xl-platform-realm.json` |
 
-Other services (`release-assistant`, `release-mcp`, `llm-service-api`,
-`release`) automatically pick up the local Keycloak issuer when their
-OIDC env vars are pointed at `KEYCLOAK_LOCAL_ISSUER` - no separate
-`-local` service variants are needed.
+Other services (`release-assistant`, `llm-service-api`, `release`)
+automatically pick up the local Keycloak issuer when their OIDC env
+vars are pointed at `KEYCLOAK_LOCAL_ISSUER` - no separate `-local`
+service variants are needed.
 
 Required env override (in your layered `.env`):
 
 ```bash
-# Point Assistant, MCP, LLM service, and (optional) Release at the local Keycloak
+# Point Assistant, LLM service, and (optional) Release at the local Keycloak
 OIDC_ISSUER_URI=${KEYCLOAK_LOCAL_ISSUER}
-MCP_OAUTH_ISSUER=${KEYCLOAK_LOCAL_ISSUER}
 DAI_AUTH_ISSUER_PATTERN=${KEYCLOAK_LOCAL_ISSUER}
 # Release OIDC vars default to OIDC_ISSUER_URI when not overridden
 # When using the local LLM service, also point the Assistant at it:
@@ -121,7 +120,7 @@ docker compose --project-directory . \
 docker compose --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-keycloak --profile with-llm-service up -d \
-    llm-service-api release-mcp release-assistant
+    llm-service-api release-assistant
 ```
 
 Full local lab (Keycloak + Release + LLM + Postgres):
@@ -136,7 +135,7 @@ docker compose --project-directory . \
 docker compose --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-keycloak --profile with-release --profile with-postgres --profile with-llm-service up -d \
-    llm-service-api release-mcp release-assistant release
+    llm-service-api release-assistant release
 ```
 
 First login suggestion: use `gandalf/gandalf` (admin-like roles) or
@@ -273,7 +272,7 @@ What the profile activates:
 
 | Service | Container name | Notes |
 |---|---|---|
-| `nginx` | `ask-release-nginx` | Public ingress; vhost-routes to Assistant, MCP, LLM service, and (optionally) Release / Keycloak |
+| `nginx` | `ask-release-nginx` | Public ingress; vhost-routes to Assistant, LLM service, and (optionally) Release / Keycloak |
 
 Required setup before first start:
 
@@ -320,36 +319,36 @@ Required setup before first start:
    `--project-directory .`):
 
    ```bash
-   # Default mode + nginx ingress (core + test compose, with-llm-service profile)
-   docker compose --project-directory . \
-     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
-     --profile with-llm-service --profile with-nginx up llm-service-dbinit
-   docker compose --project-directory . \
-     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
-     --profile with-llm-service --profile with-nginx up -d \
-       llm-service-api release-mcp release-assistant nginx
+# Default mode + nginx ingress (core + test compose, with-llm-service profile)
+    docker compose --project-directory . \
+      -f docker-compose.yaml -f test-lab/docker-compose.yaml \
+      --profile with-llm-service --profile with-nginx up llm-service-dbinit
+    docker compose --project-directory . \
+      -f docker-compose.yaml -f test-lab/docker-compose.yaml \
+      --profile with-llm-service --profile with-nginx up -d \
+        llm-service-api release-assistant nginx
 
-   # Core-only (no local LLM) + nginx ingress
-   docker compose --project-directory . \
-     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
-     --profile with-nginx up -d release-mcp release-assistant nginx
+    # Core-only (no local LLM) + nginx ingress
+    docker compose --project-directory . \
+      -f docker-compose.yaml -f test-lab/docker-compose.yaml \
+      --profile with-nginx up -d release-assistant nginx
 
-   # Full local lab (Keycloak + Release + LLM) + nginx ingress
-   docker compose --project-directory . \
-     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
-     --profile with-keycloak --profile with-release --profile with-postgres \
-     --profile with-llm-service --profile with-nginx up -d \
-     postgres keycloak
-   docker compose --project-directory . \
-     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
-     --profile with-keycloak --profile with-release --profile with-postgres \
-     --profile with-llm-service --profile with-nginx up llm-service-dbinit
+    # Full local lab (Keycloak + Release + LLM) + nginx ingress
     docker compose --project-directory . \
       -f docker-compose.yaml -f test-lab/docker-compose.yaml \
       --profile with-keycloak --profile with-release --profile with-postgres \
       --profile with-llm-service --profile with-nginx up -d \
-      llm-service-api release-mcp release-assistant release nginx
-    ```
+      postgres keycloak
+    docker compose --project-directory . \
+      -f docker-compose.yaml -f test-lab/docker-compose.yaml \
+      --profile with-keycloak --profile with-release --profile with-postgres \
+      --profile with-llm-service --profile with-nginx up llm-service-dbinit
+     docker compose --project-directory . \
+       -f docker-compose.yaml -f test-lab/docker-compose.yaml \
+       --profile with-keycloak --profile with-release --profile with-postgres \
+       --profile with-llm-service --profile with-nginx up -d \
+       llm-service-api release-assistant release nginx
+     ```
 
 First login suggestion when local Keycloak is active: `gandalf/gandalf`
 or `alice/alice` (see §2.1).
@@ -367,9 +366,10 @@ or `alice/alice` (see §2.1).
 When the profile is active, `RELEASE_PUBLIC_URL` (and
 `RELEASE_ASSISTANT_PUBLIC_URL` when the local Release is in use) must
 point at the nginx-fronted FQDN (e.g.
-`RELEASE_PUBLIC_URL=https://release.example.com`). The internal URLs
-(`RELEASE_INTERNAL_URL`, `RELEASE_MCP_INTERNAL_URL`) keep their default
-bridge-local values so Assistant and MCP reach each other and Release
+`RELEASE_PUBLIC_URL=https://release.example.com`). The internal URL
+(`RELEASE_INTERNAL_URL`) keeps its default bridge-local value so the
+Assistant reaches the Release (and the embedded MCP endpoint at
+`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`)
 directly inside the `ask-release-net` bridge. The default local-lab
 FQDNs (`https://release.example.digital.ai.local:5516`, etc.) keep
 working unchanged when the `*.example.digital.ai.local` SANs are
@@ -392,7 +392,10 @@ Lives under `test-lab/nginx/`; requires `-f test-lab/docker-compose.yaml`.
 
 The Release MCP and local LLM service have no public vhost: they are
 reached only by the Assistant over the internal `ask-release-net`
-bridge, so the nginx proxy does not need to route to them.
+bridge, so the nginx proxy does not need to route to them. (The MCP
+endpoint is embedded inside Digital.ai Release at
+`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`; the
+nginx proxy fronts the Release UI vhost only.)
 
 **Activate:**
 
@@ -404,7 +407,7 @@ bridge, so the nginx proxy does not need to route to them.
 docker compose --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-llm-service --profile with-nginx up -d \
-    llm-service-api release-mcp release-assistant nginx
+    llm-service-api release-assistant nginx
 
 # 3. Verify
 docker compose --project-directory . \
@@ -455,9 +458,11 @@ test-lab/nginx/certs/tls.key    # matching private key, PEM
 
 These flows stay on the internal `ask-release-net` bridge and do not
 need additional firewall rules. The host-level publish is the single
-`:5443` on the nginx container. MCP and the LLM service are reached by
+`:5443` on the nginx container. The LLM service is reached by
 the Assistant over the internal bridge, not via the public nginx
-vhosts.
+vhosts. (The embedded MCP endpoint lives on the Release image at
+`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` and is
+reached by the Assistant over the same internal bridge.)
 
 **Production recommendations when using `with-nginx`:**
 
@@ -473,12 +478,14 @@ vhosts.
    cert in production.
 4. Set `RELEASE_PUBLIC_URL`, `RELEASE_ASSISTANT_PUBLIC_URL` (when the
    local Release is in use), and the local Keycloak FQDN to the
-   nginx-fronted public URL (port 5443, https) so the Assistant, MCP,
-   Release, and the IdP see consistent issuer/audience values. Keep
-   `RELEASE_INTERNAL_URL` and `RELEASE_MCP_INTERNAL_URL` at their
-   default bridge-local values (`http://release:5516` and
-   `http://release-mcp:8000`) so the in-bridge traffic does not loop
-   through nginx.
+   nginx-fronted public URL (port 5443, https) so the Assistant, the
+   embedded MCP endpoint (on the Release base URL), the Release UI, and
+   the IdP see consistent issuer/audience values. Keep
+   `RELEASE_INTERNAL_URL` at its default bridge-local value
+   (`http://release:5516`) so the in-bridge traffic from the Assistant to
+   the Release (and its embedded MCP endpoint at
+   `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`)
+   does not loop through nginx.
 5. Front the nginx container with a corporate load balancer or WAF
    when multiple nginx replicas are required for HA; for single-host
    PoC the nginx container is the ingress.
@@ -570,49 +577,49 @@ docker compose ps
 
 ### Tail logs
 
-Follow logs for core services (MCP + Assistant, default core mode):
+Follow logs for the Assistant (default core mode):
 
 ```bash
-docker compose logs -f release-mcp release-assistant
+docker compose logs -f release-assistant
 ```
 
 Follow logs for the default stack (also includes local LLM service):
 
 ```bash
-docker compose logs -f release-mcp llm-service-api release-assistant
+docker compose logs -f llm-service-api release-assistant
 ```
 
 Follow logs for the full local stack (also includes optional local
 Release):
 
 ```bash
-docker compose logs -f release-mcp llm-service-api release-assistant release
+docker compose logs -f llm-service-api release-assistant release
 ```
 
 ### Restart services
 
-Restart core services (MCP + Assistant):
+Restart the Assistant (default core mode):
 
 ```bash
-docker compose restart release-mcp release-assistant
+docker compose restart release-assistant
 ```
 
-Restart the default stack (MCP + LLM service + Assistant):
+Restart the default stack (LLM service + Assistant):
 
 ```bash
-docker compose restart release-mcp llm-service-api release-assistant
+docker compose restart llm-service-api release-assistant
 ```
 
 Restart the full local stack (also includes optional local Release):
 
 ```bash
-docker compose restart release-mcp llm-service-api release-assistant release
+docker compose restart llm-service-api release-assistant release
 ```
 
 ### Pull images
 
 ```bash
-docker compose pull release-mcp llm-service-api release-assistant llm-service-dbinit postgres release
+docker compose pull llm-service-api release-assistant llm-service-dbinit postgres release
 ```
 
 ### Run LLM service DB init (one-shot)
@@ -629,11 +636,10 @@ docker compose down --remove-orphans
 
 ### Health checks
 
-Default stack health (Assistant + MCP + local LLM service):
+Default stack health (Assistant + local LLM service):
 
 ```bash
 curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness" && echo " - assistant ok"
-curl -fsS "http://localhost:${MCP_PORT:-8000}/utility/healthcheck" && echo " - mcp ok"
 curl -fsS "http://localhost:${LLM_SERVICE_PORT:-9000}/llm/utility/ping" && echo " - llm-service ok"
 ```
 
@@ -641,14 +647,12 @@ Core services health (no local LLM service):
 
 ```bash
 curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness" && echo " - assistant ok"
-curl -fsS "http://localhost:${MCP_PORT:-8000}/utility/healthcheck" && echo " - mcp ok"
 ```
 
 Full local stack health (also includes optional local Release):
 
 ```bash
 curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness" && echo " - assistant ok"
-curl -fsS "http://localhost:${MCP_PORT:-8000}/utility/healthcheck" && echo " - mcp ok"
 curl -fsS "http://localhost:${LLM_SERVICE_PORT:-9000}/llm/utility/ping" && echo " - llm-service ok"
 curl -fsS "http://localhost:${RELEASE_HTTP_PORT:-5516}/s/actuator/health/liveness" && echo " - release ok"
 ```
@@ -705,7 +709,6 @@ trust stores.
 `.env` (customised from `.env.base`):
 ```bash
 RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.1.3-SNAPSHOT
-RELEASE_MCP_IMAGE=xebialabsunsupported/dai-release-mcp:26.1.1.dev18
 LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255
 LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255
 RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.619
@@ -714,7 +717,6 @@ POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
 
 ASSISTANT_PORT=8090
-MCP_PORT=8000
 LLM_SERVICE_PORT=9000
 RELEASE_HTTP_PORT=5516
 KEYCLOAK_HTTP_PORT=5080
@@ -730,7 +732,6 @@ RELEASE_PUBLIC_URL=http://${RELEASE_HOSTNAME}:${RELEASE_HTTP_PORT}
 RELEASE_ASSISTANT_PUBLIC_URL=http://${ASSISTANT_HOSTNAME}:${ASSISTANT_PORT}
 
 RELEASE_INTERNAL_URL=http://release:${RELEASE_HTTP_PORT}
-RELEASE_MCP_INTERNAL_URL=http://release-mcp:${MCP_PORT}
 
 OAUTH2_TOKEN_CLIENT_ID=replace-me
 OAUTH2_TOKEN_CLIENT_SECRET=replace-me
@@ -744,7 +745,7 @@ docker compose \
   --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-release \
-  up -d postgres release release-mcp release-assistant
+  up -d postgres release release-assistant
 ```
 
 If your IdP / Release / Assistant are signed by an internal CA, also
@@ -784,7 +785,6 @@ docker compose \
 `.env`:
 ```bash
 RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.1.3-SNAPSHOT
-RELEASE_MCP_IMAGE=xebialabsunsupported/dai-release-mcp:26.1.1.dev18
 LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255
 LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255
 RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.619
@@ -793,7 +793,6 @@ POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
 
 ASSISTANT_PORT=8090
-MCP_PORT=8000
 LLM_SERVICE_PORT=9000
 RELEASE_HTTP_PORT=5516
 KEYCLOAK_HTTP_PORT=5080
@@ -813,14 +812,11 @@ RELEASE_PUBLIC_URL=https://${NGINX_RELEASE_HOSTNAME}:${NGINX_HTTPS_PORT}
 RELEASE_ASSISTANT_PUBLIC_URL=https://${NGINX_ASSISTANT_HOSTNAME}:${NGINX_HTTPS_PORT}
 
 RELEASE_INTERNAL_URL=http://release:${RELEASE_HTTP_PORT}
-RELEASE_MCP_INTERNAL_URL=http://release-mcp:${MCP_PORT}
 
 OAUTH2_TOKEN_CLIENT_ID=replace-me
 OAUTH2_TOKEN_CLIENT_SECRET=replace-me
 OAUTH2_SCOPES="openid, dai-svc"
 OIDC_ISSUER_URI=https://${IDP_HOSTNAME}/auth/realms/onboarding
-
-MCP_VERIFY_SSL=false
 ```
 
 Self-signed certs for local labs only:
@@ -838,7 +834,7 @@ docker compose \
   --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-nginx --profile with-release \
-  up -d postgres nginx release release-mcp release-assistant
+  up -d postgres nginx release release-assistant
 ```
 
 If your IdP / Release / Assistant are signed by an internal CA, also
@@ -881,7 +877,6 @@ docker compose \
 `.env`:
 ```bash
 RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.1.3-SNAPSHOT
-RELEASE_MCP_IMAGE=xebialabsunsupported/dai-release-mcp:26.1.1.dev18
 LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255
 LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255
 RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.619
@@ -890,7 +885,6 @@ POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
 
 ASSISTANT_PORT=8090
-MCP_PORT=8000
 LLM_SERVICE_PORT=9000
 RELEASE_HTTP_PORT=5516
 KEYCLOAK_HTTP_PORT=5080
@@ -910,14 +904,11 @@ RELEASE_PUBLIC_URL=https://${NGINX_RELEASE_HOSTNAME}:${NGINX_HTTPS_PORT}
 RELEASE_ASSISTANT_PUBLIC_URL=https://${NGINX_ASSISTANT_HOSTNAME}:${NGINX_HTTPS_PORT}
 
 RELEASE_INTERNAL_URL=http://release:${RELEASE_HTTP_PORT}
-RELEASE_MCP_INTERNAL_URL=http://release-mcp:${MCP_PORT}
 
 OAUTH2_TOKEN_CLIENT_ID=replace-me
 OAUTH2_TOKEN_CLIENT_SECRET=replace-me
 OAUTH2_SCOPES="openid, dai-svc"
 OIDC_ISSUER_URI=https://${IDP_HOSTNAME}/auth/realms/onboarding
-
-MCP_VERIFY_SSL=false
 
 AI_LLM_BASE_URL=http://llm-service-api:${LLM_SERVICE_PORT}/llm
 AI_LLM_CHAT_MODEL=replace-me
@@ -942,7 +933,7 @@ docker compose \
   --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-nginx --profile with-release \
-  up -d postgres llm-service-api nginx release release-mcp release-assistant
+  up -d postgres llm-service-api nginx release release-assistant
 ```
 
 If your IdP / Release / Assistant / LLM backend are signed by an
@@ -983,7 +974,6 @@ docker compose \
 `.env`:
 ```bash
 RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.1.3-SNAPSHOT
-RELEASE_MCP_IMAGE=xebialabsunsupported/dai-release-mcp:26.1.1.dev18
 LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255
 LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255
 RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.619
@@ -992,7 +982,6 @@ POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
 
 ASSISTANT_PORT=8090
-MCP_PORT=8000
 LLM_SERVICE_PORT=9000
 RELEASE_HTTP_PORT=5516
 KEYCLOAK_HTTP_PORT=5080
@@ -1013,7 +1002,6 @@ RELEASE_PUBLIC_URL=https://${NGINX_RELEASE_HOSTNAME}:${NGINX_HTTPS_PORT}
 RELEASE_ASSISTANT_PUBLIC_URL=https://${NGINX_ASSISTANT_HOSTNAME}:${NGINX_HTTPS_PORT}
 
 RELEASE_INTERNAL_URL=http://release:${RELEASE_HTTP_PORT}
-RELEASE_MCP_INTERNAL_URL=http://release-mcp:${MCP_PORT}
 
 OAUTH2_SCOPES="openid"
 OAUTH2_TOKEN_CLIENT_ID=xl-release
@@ -1024,9 +1012,6 @@ KEYCLOAK_PORT=${NGINX_HTTPS_PORT}
 KEYCLOAK_REALM=xl-platform
 KEYCLOAK_LOCAL_ISSUER=${KEYCLOAK_PROTOCOL}://${NGINX_IDP_HOSTNAME}:${NGINX_HTTPS_PORT}/realms/${KEYCLOAK_REALM}
 OIDC_ISSUER_URI=${KEYCLOAK_LOCAL_ISSUER}
-
-MCP_OAUTH_JWKS_URL=${OIDC_ISSUER_URI}/protocol/openid-connect/certs
-MCP_VERIFY_SSL=false
 
 AI_LLM_BASE_URL=http://llm-service-api:${LLM_SERVICE_PORT}/llm
 AI_LLM_CHAT_MODEL=replace-me
@@ -1061,7 +1046,7 @@ docker compose \
   -f test-lab/docker-compose.yaml \
   -f test-lab/docker-compose.with-internal-ca.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-nginx --profile with-release \
-  up -d postgres llm-service-api keycloak nginx release release-mcp release-assistant
+  up -d postgres llm-service-api keycloak nginx release release-assistant
 ```
 
 Check:
@@ -1102,7 +1087,10 @@ First login suggestion: use `gandalf/gandalf` or `alice/alice` (see §2.1).
 
 Same as recipe 8.4 but drop `--profile with-release` (and the
 `release` service from the `up -d` list) when you want to point the
-assistant/MCP at an existing external Digital.ai Release installation.
+Assistant at an existing external Digital.ai Release installation.
+The Assistant reaches the embedded MCP endpoint on the external
+Release via the `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`
+URL chain.
 
 First login suggestion when local Keycloak is in use: `gandalf/gandalf`
 or `alice/alice` (see §2.1).
@@ -1119,20 +1107,21 @@ or `alice/alice` (see §2.1).
 
 ## 9) Hybrid scenario (On-Prem Assistant + SaaS LLM)
 
-Use this scenario when Assistant and MCP run on-prem, while model
-inference is handled by Digital.ai SaaS LLM endpoints.
+Use this scenario when the Assistant runs on-prem, while model
+inference is handled by Digital.ai SaaS LLM endpoints. The embedded
+MCP endpoint on the (external or in-stack) Release is still the bridge
+between the Assistant and Digital.ai Release data/actions.
 
 Scope in this repository:
 
-- Start `release-assistant` + `release-mcp` only.
+- Start `release-assistant` only.
 - Do not start local `llm-service-dbinit` or `llm-service-api`.
 
 Required minimum configuration:
 
 - `RELEASE_PUBLIC_URL`
 - `RELEASE_INTERNAL_URL`
-- `RELEASE_MCP_INTERNAL_URL`
-- `MCP_OAUTH_AUDIENCE`
+- `RELEASE_MCP_SERVER_ENDPOINT`
 - `OAUTH2_TOKEN_CLIENT_ID`, `OAUTH2_TOKEN_CLIENT_SECRET`
 - `OIDC_ISSUER_URI`
 - `DB_URL_SUFFIX`, `DB_USERNAME`, `DB_PASSWORD`
@@ -1145,14 +1134,13 @@ Installation steps:
 3. Start core services without local LLM:
 
 ```bash
-docker compose up -d release-mcp release-assistant
+docker compose up -d release-assistant
 ```
 
 4. Verify deployment:
 
 ```bash
 curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness" && echo " - assistant ok"
-curl -fsS "http://localhost:${MCP_PORT:-8000}/utility/healthcheck" && echo " - mcp ok"
 ```
 
 5. Run an end-to-end Ask Release chat test from Release UI.
@@ -1171,16 +1159,14 @@ customer environment.
 
 Scope in this repository:
 
-- Start `llm-service-dbinit` + `llm-service-api` + `release-mcp` +
-  `release-assistant`.
+- Start `llm-service-dbinit` + `llm-service-api` + `release-assistant`.
 - Optionally include local postgres profile for labs.
 
 Required minimum configuration:
 
 - `RELEASE_PUBLIC_URL`
 - `RELEASE_INTERNAL_URL`
-- `RELEASE_MCP_INTERNAL_URL`
-- `MCP_OAUTH_AUDIENCE`
+- `RELEASE_MCP_SERVER_ENDPOINT`
 - `OAUTH2_TOKEN_CLIENT_ID`, `OAUTH2_TOKEN_CLIENT_SECRET`
 - `OIDC_ISSUER_URI`
 - `DB_URL_SUFFIX`, `DB_USERNAME`, `DB_PASSWORD`
@@ -1196,7 +1182,7 @@ Installation steps:
 
 ```bash
 docker compose --profile with-llm-service up llm-service-dbinit
-docker compose --profile with-llm-service up -d llm-service-api release-mcp release-assistant
+docker compose --profile with-llm-service up -d llm-service-api release-assistant
 ```
 
 3. If using local postgres profile in labs:
@@ -1204,14 +1190,13 @@ docker compose --profile with-llm-service up -d llm-service-api release-mcp rele
 ```bash
 docker compose --profile with-postgres up -d postgres
 docker compose --profile with-postgres --profile with-llm-service up llm-service-dbinit
-docker compose --profile with-postgres --profile with-llm-service up -d llm-service-api release-mcp release-assistant
+docker compose --profile with-postgres --profile with-llm-service up -d llm-service-api release-assistant
 ```
 
 4. Verify deployment:
 
 ```bash
 curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness" && echo " - assistant ok"
-curl -fsS "http://localhost:${MCP_PORT:-8000}/utility/healthcheck" && echo " - mcp ok"
 curl -fsS "http://localhost:${LLM_SERVICE_PORT:-9000}/llm/utility/ping" && echo " - llm-service ok"
 ```
 
@@ -1291,9 +1276,8 @@ and the `KC_HOSTNAME` image env is wired to `${IDP_HOSTNAME}`.
 `.env.base`) are not consumed by the local Keycloak container directly -
 they exist to give the other services a single derived issuer URI
 (`http://${IDP_HOSTNAME}:${KEYCLOAK_HTTP_PORT}/realms/${KEYCLOAK_REALM}`)
-to point `OIDC_ISSUER_URI`, `MCP_OAUTH_ISSUER`,
-`DAI_AUTH_ISSUER_PATTERN` at when the `with-keycloak` profile is
-active.
+to point `OIDC_ISSUER_URI` and `DAI_AUTH_ISSUER_PATTERN` at when the
+`with-keycloak` profile is active.
 
 ### Compose-internal defaults (`test-lab/nginx/compose.yaml`)
 
@@ -1389,7 +1373,7 @@ active.
 | `network ask-release-data declared as external, but could not be found` (or `ask-release-net`) | TEST compose is being used standalone and the shared networks are flagged `external: true` | `git pull` - the fix drops `external: true` from the networks in `test-lab/docker-compose.yaml` so Compose auto-creates them; standalone runs work without first running the CORE compose |
 | `Error response from daemon: error while creating mount source path '.../test-lab/nginx/certs/cacerts.jks': chown ...: permission denied` | Stale directory at `test-lab/nginx/certs/cacerts.jks` from a prior failed run; `test-lab/release/compose.yaml` previously pointed at this path | `rmdir test-lab/nginx/certs/cacerts.jks` (current compose now sources `certs/cacerts.jks` from the repo root, populated by `install-internal-ca.sh`); rerun `./install-internal-ca.sh <corp-ca-bundle.pem>` if `certs/cacerts.jks` is also missing |
 
-For the CORE-side troubleshooting (Assistant / MCP / LLM service auth,
+For the CORE-side troubleshooting (Assistant / LLM service auth,
 DB connectivity, OIDC issuer mismatches), see
 [README.md §14.3](../README.md#143-common-issues-and-first-response).
 
@@ -1400,8 +1384,15 @@ DB connectivity, OIDC issuer mismatches), see
   in-container bind mounts for certs and logs. Do not use the lab
   stack as-is in production.
 - Every lab profile is opt-in; the CORE compose starts the
-  release-assistant, release-mcp, and (with `--profile with-llm-service`)
+  release-assistant and (with `--profile with-llm-service`)
   llm-service-api without needing any of `test-lab/`.
+- The MCP (Model Context Protocol) server is no longer a separate
+  service in this compose stack. It is embedded inside Digital.ai
+  Release and exposed at
+  `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`.
+  The Assistant connects to that endpoint directly over the
+  `ask-release-net` bridge; there is no MCP container, port, image,
+  or OIDC block.
 - The two compose files use shared network and volume names so the
   combined CORE + TEST stack resolves to a single set of resources.
   Standalone runs of either compose also work because Compose

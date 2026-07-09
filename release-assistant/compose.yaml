@@ -13,8 +13,12 @@ services:
       DB_URL_SUFFIX: ${RELEASE_ASSISTANT_DB_URL_SUFFIX:-postgresql://${POSTGRES_HOSTNAME}:${POSTGRES_PORT}/dai_assistant}
       DB_USERNAME: ${RELEASE_ASSISTANT_DB_USERNAME:-dai_assistant}
       DB_PASSWORD: ${RELEASE_ASSISTANT_DB_PASSWORD:-dai_assistant}
-      RELEASE_BASE_URL: ${RELEASE_PUBLIC_URL}
-      RELEASE_MCP_SERVER_URL: ${RELEASE_MCP_INTERNAL_URL}
+      # RELEASE_BASE_URL drives both the Assistant's CORS allowed origin and
+      # the MCP server base URL inside the Assistant configmap (the MCP
+      # endpoint is embedded inside Digital.ai Release and exposed at
+      # ${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}).
+      RELEASE_BASE_URL: ${RELEASE_INTERNAL_URL}
+      RELEASE_MCP_SERVER_ENDPOINT: ${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}
       OIDC_ISSUER_URI: ${ASSISTANT_OIDC_ISSUER_URI:-${OIDC_ISSUER_URI}}
       OIDC_JWK_SET_URI: ${OIDC_JWK_SET_URI:-${OIDC_ISSUER_URI}/protocol/openid-connect/certs}
       AI_MODEL_CHAT: ${AI_MODEL_CHAT:-llm}

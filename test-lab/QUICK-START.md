@@ -20,7 +20,7 @@ How traffic flows in this quick start:
 
 - browser -> `http://release.example.digital.ai.local:5516`
 - Release -> Assistant (`RELEASE_ASSISTANT_PUBLIC_URL`)
-- Assistant -> MCP -> Release (internal docker network)
+- Assistant -> Release embedded MCP endpoint `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` (internal docker network)
 - Assistant -> local LLM service (`http://llm-service-api:9000/llm`)
 - OIDC auth -> local Keycloak over HTTP on `:5080`
 
@@ -60,10 +60,6 @@ RELEASE_ASSISTANT_PUBLIC_URL=http://${ASSISTANT_HOSTNAME}:${ASSISTANT_PORT}
 KEYCLOAK_REALM=xl-platform
 KEYCLOAK_LOCAL_ISSUER=http://${IDP_HOSTNAME}:${KEYCLOAK_HTTP_PORT}/realms/${KEYCLOAK_REALM}
 OIDC_ISSUER_URI=${KEYCLOAK_LOCAL_ISSUER}
-MCP_OAUTH_ISSUER=${KEYCLOAK_LOCAL_ISSUER}
-MCP_OAUTH_JWKS_URL=${OIDC_ISSUER_URI}/protocol/openid-connect/certs
-
-MCP_VERIFY_SSL=false
 
 AI_LLM_BASE_URL=http://llm-service-api:${LLM_SERVICE_PORT}/llm
 AI_LLM_CHAT_MODEL=replace-me
@@ -79,6 +75,7 @@ Why these values matter:
 - `KEYCLOAK_LOCAL_ISSUER` / `OIDC_ISSUER_URI` point all auth validation to local Keycloak.
 - `AI_LLM_BASE_URL` switches Assistant to the in-stack LLM service.
 - `DAI_*` and `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` are required by the LLM service tenant/provider bootstrap.
+- `RELEASE_INTERNAL_URL` (defaults to `http://release:${RELEASE_HTTP_PORT}`) and `RELEASE_MCP_SERVER_ENDPOINT` (defaults to `/s/mcp`) point the Assistant at the embedded MCP endpoint on the in-bridge Release alias.
 
 ## 3) Start infrastructure services first
 
@@ -107,14 +104,14 @@ docker compose --project-directory . \
 
 ## 5) Start application services
 
-Now start Release, MCP, Assistant, and the LLM API.
+Now start Release, Assistant, and the LLM API.
 
 ```bash
 docker compose --project-directory . \
   -f docker-compose.yaml \
   -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
-  up -d llm-service-api release release-mcp release-assistant
+  up -d llm-service-api release release-assistant
 ```
 
 ## 6) Verify
@@ -134,7 +131,6 @@ Check health endpoints:
 ```bash
 curl -fsS "http://localhost:${RELEASE_HTTP_PORT:-5516}/s/actuator/health/liveness"
 curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness"
-curl -fsS "http://localhost:${MCP_PORT:-8000}/utility/healthcheck"
 curl -fsS "http://localhost:${LLM_SERVICE_PORT:-9000}/llm/utility/ping"
 curl -fsS "http://localhost:${KEYCLOAK_HTTP_PORT:-5080}/health/ready"
 ```
@@ -175,7 +171,7 @@ docker compose --project-directory . \
   -f docker-compose.yaml \
   -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
-  logs -f release release-assistant release-mcp llm-service-api keycloak postgres
+  logs -f release release-assistant llm-service-api keycloak postgres
 ```
 
 ## 8) Tear down

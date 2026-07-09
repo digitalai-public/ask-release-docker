@@ -9,6 +9,13 @@
 # For local LLM Service mode, override:
 #   ai.llm.base-url:  http://llm-service-api:9000
 #   ai.llm.chat.model: <model name returned by the local LLM service>
+#
+# The MCP endpoint is embedded inside Digital.ai Release and exposed at
+# ${RELEASE_BASE_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}. Both vars are
+# sourced from release-assistant/compose.yaml. Override RELEASE_BASE_URL
+# via RELEASE_INTERNAL_URL in your layered .env when you want the Assistant
+# to talk to Release over a private in-bridge address (e.g.
+# http://release:5516) while keeping the public RELEASE_PUBLIC_URL for CORS.
 # ----------------------------------------------------------------------------
 
 spring:
@@ -81,6 +88,10 @@ spring:
           X-Digitalai-AppName: release/integration
 
     # MCP Server Configuration (Configure your MCP servers)
+    # The MCP server is embedded inside Digital.ai Release and exposed at
+    # ${RELEASE_BASE_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}.
+    # `url` is the Release base URL (in-bridge when behind nginx); `endpoint`
+    # is the path the embedded MCP server is mounted at on the Release image.
     mcp:
       client:
         type: sync
@@ -88,9 +99,10 @@ spring:
         initialized: false
         streamable-http:
           connections:
-            # Digital.ai Release MCP Server
+            # Digital.ai Release MCP Server (embedded)
             dai-release:
-              url: ${RELEASE_MCP_SERVER_URL:}
+              url: ${RELEASE_MCP_SERVER_BASE_URL:${RELEASE_BASE_URL:}}
+              endpoint: ${RELEASE_MCP_SERVER_ENDPOINT:/s/mcp}
 
 # Application Configuration
 app:

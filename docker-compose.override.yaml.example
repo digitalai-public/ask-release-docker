@@ -12,7 +12,7 @@
 #   - Sets CPU / memory / PID limits aligned to the small sizing tier
 #   - Restricts host-port bindings to loopback (127.0.0.1)
 #
-# This overlay only covers the CORE services (release-assistant, release-mcp,
+# This overlay only covers the CORE services (release-assistant,
 # llm-service-api). Test-stack services (keycloak, nginx, postgres, release)
 # are local-lab infrastructure and are hardened through
 # test-lab/docker-compose.override.yaml.example instead.
@@ -43,15 +43,6 @@ services:
     pids_limit: 256
     ports:
       - "127.0.0.1:${ASSISTANT_PORT:-8090}:8090"
-
-  release-mcp:
-    <<: *hardening
-    cpus: "1"
-    mem_limit: 2g
-    mem_reservation: 1g
-    pids_limit: 128
-    ports:
-      - "127.0.0.1:${MCP_PORT:-8000}:8000"
 
   llm-service-api:
     <<: *hardening

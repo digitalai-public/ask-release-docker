@@ -4,7 +4,6 @@
 # This compose file ships the production surface of Ask Release:
 #
 #   - release-assistant : the Ask Release web UI and chat backend
-#   - release-mcp       : Model Context Protocol bridge to Digital.ai Release
 #   - llm-service-api   : local LLM provider gateway (optional, with-llm-service)
 #   - llm-service-dbinit: one-shot database seeder for the LLM service
 #
@@ -12,6 +11,11 @@
 # test-lab/docker-compose.yaml and are activated via their own profiles. Combine
 # the two compose files with `-f test-lab/docker-compose.yaml` when you want the
 # full end-to-end stack. See test-lab/docker-compose.yaml for details.
+#
+# Note: The MCP (Model Context Protocol) is no longer shipped as a separate
+# component. It is embedded inside Digital.ai Release and exposed at the
+# ${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp} path on the Release base URL. The
+# Assistant connects to that endpoint directly via ${RELEASE_BASE_URL}.
 # ----------------------------------------------------------------------------
 
 name: ask-release-docker
@@ -21,14 +25,6 @@ services:
     extends:
       file: release-assistant/compose.yaml
       service: release-assistant
-    depends_on:
-      release-mcp:
-        condition: service_healthy
-
-  release-mcp:
-    extends:
-      file: dai-release-mcp/compose.yaml
-      service: release-mcp
 
   llm-service-dbinit:
     profiles: ["init", "with-llm-service"]
