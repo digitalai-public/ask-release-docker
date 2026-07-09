@@ -17,7 +17,10 @@ services:
     container_name: ask-release-llm-service-dbinit
     restart: "no"
     environment:
+      <<: *llm-common
       LLM_SERVICE_DEFAULT_PROVIDER_CONFIG: ${LLM_SERVICE_DEFAULT_PROVIDER_CONFIG:?LLM_SERVICE_DEFAULT_PROVIDER_CONFIG must be set (base64-encoded JSON)}
+      DAI_ACCOUNT_ID: ${DAI_ACCOUNT_ID:-}
+      DAI_AUTH_ISSUER_PATTERN: ${DAI_AUTH_ISSUER_PATTERN:-}
       DAI_FEATURE__PLAINTEXT_LOGGING: ${LLM_DBINIT_PLAINTEXT_LOGGING:-true}
       DAI_SERVICE_LOG_LEVEL: ${LLM_DBINIT_LOG_LEVEL:-trace}
     networks:

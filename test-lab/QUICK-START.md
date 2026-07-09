@@ -90,6 +90,18 @@ docker compose --project-directory . \
   up -d postgres keycloak
 ```
 
+Wait until both are healthy before moving on (especially Keycloak):
+
+```bash
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  ps
+
+curl -fsS "http://localhost:${KEYCLOAK_MGMT_PORT:-15090}/health/ready"
+```
+
 ## 4) Run one-time LLM DB init
 
 `llm-service-dbinit` applies schema migrations and seed/provider bootstrap, then exits.
@@ -129,11 +141,18 @@ docker compose --project-directory . \
 Check health endpoints:
 
 ```bash
-curl -fsS "http://localhost:${RELEASE_HTTP_PORT:-5516}/s/actuator/health/liveness"
+curl -fsS "http://127.0.0.1:${RELEASE_HTTP_PORT:-5516}/s/actuator/health/liveness"
 curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness"
 curl -fsS "http://localhost:${LLM_SERVICE_PORT:-9000}/llm/utility/ping"
-curl -fsS "http://localhost:${KEYCLOAK_HTTP_PORT:-5080}/health/ready"
+curl -fsS "http://localhost:${KEYCLOAK_MGMT_PORT:-15090}/health/ready"
 ```
+
+Notes:
+
+- Some hosts resolve `localhost` to IPv6 first. If Release health returns
+  `Empty reply from server`, use `127.0.0.1` as shown above.
+- Keycloak readiness is exposed on the management port
+  (`KEYCLOAK_MGMT_PORT`, default `15090`), not the public HTTP port.
 
 Open:
 
