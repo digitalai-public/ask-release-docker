@@ -1608,6 +1608,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "ab2088f6-2251-4233-9b22-e24db6a67483",
       "redirectUris": [
+        "http://release.example.digital.ai.local:5516/oidc-login",
         "https://release.example.digital.ai.nginx:5443/oidc-login"
       ],
       "webOrigins": [

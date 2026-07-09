@@ -63,17 +63,7 @@ docker compose --project-directory . \
 curl -fsS "http://localhost:${KEYCLOAK_MGMT_PORT:-15090}/health/ready"
 ```
 
-5. Run db init:
-
-```bash
-docker compose --project-directory . \
-  -f docker-compose.yaml \
-  -f test-lab/docker-compose.yaml \
-  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
-  up llm-service-dbinit
-```
-
-6. Start app services:
+5. Start app services:
 
 ```bash
 docker compose --project-directory . \

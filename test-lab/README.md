@@ -366,11 +366,7 @@ or `alice/alice` (see §2.1).
 When the profile is active, `RELEASE_PUBLIC_URL` (and
 `RELEASE_ASSISTANT_PUBLIC_URL` when the local Release is in use) must
 point at the nginx-fronted FQDN (e.g.
-`RELEASE_PUBLIC_URL=https://release.example.com`). The internal URL
-(`RELEASE_INTERNAL_URL`) keeps its default bridge-local value so the
-Assistant reaches the Release (and the embedded MCP endpoint at
-`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`)
-directly inside the `ask-release-net` bridge. The default local-lab
+`RELEASE_PUBLIC_URL=https://release.example.com`). The default local-lab
 FQDNs (`https://release.example.digital.ai.local:5516`, etc.) keep
 working unchanged when the `*.example.digital.ai.local` SANs are
 present on the cert.
@@ -394,7 +390,7 @@ The Release MCP and local LLM service have no public vhost: they are
 reached only by the Assistant over the internal `ask-release-net`
 bridge, so the nginx proxy does not need to route to them. (The MCP
 endpoint is embedded inside Digital.ai Release at
-`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`; the
+`${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`; the
 nginx proxy fronts the Release UI vhost only.)
 
 **Activate:**
@@ -461,7 +457,7 @@ need additional firewall rules. The host-level publish is the single
 `:5443` on the nginx container. The LLM service is reached by
 the Assistant over the internal bridge, not via the public nginx
 vhosts. (The embedded MCP endpoint lives on the Release image at
-`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` and is
+`${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` and is
 reached by the Assistant over the same internal bridge.)
 
 **Production recommendations when using `with-nginx`:**
@@ -480,12 +476,7 @@ reached by the Assistant over the same internal bridge.)
    local Release is in use), and the local Keycloak FQDN to the
    nginx-fronted public URL (port 5443, https) so the Assistant, the
    embedded MCP endpoint (on the Release base URL), the Release UI, and
-   the IdP see consistent issuer/audience values. Keep
-   `RELEASE_INTERNAL_URL` at its default bridge-local value
-   (`http://release:5516`) so the in-bridge traffic from the Assistant to
-   the Release (and its embedded MCP endpoint at
-   `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`)
-   does not loop through nginx.
+   the IdP see consistent issuer/audience values.
 5. Front the nginx container with a corporate load balancer or WAF
    when multiple nginx replicas are required for HA; for single-host
    PoC the nginx container is the ingress.
@@ -731,8 +722,6 @@ IDP_HOSTNAME=replace-me
 RELEASE_PUBLIC_URL=http://${RELEASE_HOSTNAME}:${RELEASE_HTTP_PORT}
 RELEASE_ASSISTANT_PUBLIC_URL=http://${ASSISTANT_HOSTNAME}:${ASSISTANT_PORT}
 
-RELEASE_INTERNAL_URL=http://release:${RELEASE_HTTP_PORT}
-
 OAUTH2_TOKEN_CLIENT_ID=replace-me
 OAUTH2_TOKEN_CLIENT_SECRET=replace-me
 OAUTH2_SCOPES="openid, dai-svc"
@@ -810,8 +799,6 @@ NGINX_ASSISTANT_HOSTNAME=release-assistant.example.digital.ai.nginx
 
 RELEASE_PUBLIC_URL=https://${NGINX_RELEASE_HOSTNAME}:${NGINX_HTTPS_PORT}
 RELEASE_ASSISTANT_PUBLIC_URL=https://${NGINX_ASSISTANT_HOSTNAME}:${NGINX_HTTPS_PORT}
-
-RELEASE_INTERNAL_URL=http://release:${RELEASE_HTTP_PORT}
 
 OAUTH2_TOKEN_CLIENT_ID=replace-me
 OAUTH2_TOKEN_CLIENT_SECRET=replace-me
@@ -902,8 +889,6 @@ NGINX_ASSISTANT_HOSTNAME=release-assistant.example.digital.ai.nginx
 
 RELEASE_PUBLIC_URL=https://${NGINX_RELEASE_HOSTNAME}:${NGINX_HTTPS_PORT}
 RELEASE_ASSISTANT_PUBLIC_URL=https://${NGINX_ASSISTANT_HOSTNAME}:${NGINX_HTTPS_PORT}
-
-RELEASE_INTERNAL_URL=http://release:${RELEASE_HTTP_PORT}
 
 OAUTH2_TOKEN_CLIENT_ID=replace-me
 OAUTH2_TOKEN_CLIENT_SECRET=replace-me
@@ -1001,8 +986,6 @@ NGINX_IDP_HOSTNAME=identity.example.digital.ai.nginx
 RELEASE_PUBLIC_URL=https://${NGINX_RELEASE_HOSTNAME}:${NGINX_HTTPS_PORT}
 RELEASE_ASSISTANT_PUBLIC_URL=https://${NGINX_ASSISTANT_HOSTNAME}:${NGINX_HTTPS_PORT}
 
-RELEASE_INTERNAL_URL=http://release:${RELEASE_HTTP_PORT}
-
 OAUTH2_SCOPES="openid"
 OAUTH2_TOKEN_CLIENT_ID=xl-release
 OAUTH2_TOKEN_CLIENT_SECRET=ab2088f6-2251-4233-9b22-e24db6a67483
@@ -1089,7 +1072,7 @@ Same as recipe 8.4 but drop `--profile with-release` (and the
 `release` service from the `up -d` list) when you want to point the
 Assistant at an existing external Digital.ai Release installation.
 The Assistant reaches the embedded MCP endpoint on the external
-Release via the `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`
+Release via the `${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`
 URL chain.
 
 First login suggestion when local Keycloak is in use: `gandalf/gandalf`
@@ -1120,7 +1103,6 @@ Scope in this repository:
 Required minimum configuration:
 
 - `RELEASE_PUBLIC_URL`
-- `RELEASE_INTERNAL_URL`
 - `RELEASE_MCP_SERVER_ENDPOINT`
 - `OAUTH2_TOKEN_CLIENT_ID`, `OAUTH2_TOKEN_CLIENT_SECRET`
 - `OIDC_ISSUER_URI`
@@ -1165,7 +1147,6 @@ Scope in this repository:
 Required minimum configuration:
 
 - `RELEASE_PUBLIC_URL`
-- `RELEASE_INTERNAL_URL`
 - `RELEASE_MCP_SERVER_ENDPOINT`
 - `OAUTH2_TOKEN_CLIENT_ID`, `OAUTH2_TOKEN_CLIENT_SECRET`
 - `OIDC_ISSUER_URI`
@@ -1389,7 +1370,7 @@ DB connectivity, OIDC issuer mismatches), see
 - The MCP (Model Context Protocol) server is no longer a separate
   service in this compose stack. It is embedded inside Digital.ai
   Release and exposed at
-  `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`.
+  `${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`.
   The Assistant connects to that endpoint directly over the
   `ask-release-net` bridge; there is no MCP container, port, image,
   or OIDC block.

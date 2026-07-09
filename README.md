@@ -24,7 +24,7 @@ Compose resolves `extends` paths against the project root.
 > separate component. It is embedded inside Digital.ai Release and
 > exposed at the `${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` path on the
 > Release base URL. The Assistant connects to that endpoint directly
-> via `${RELEASE_INTERNAL_URL}`; there is no separate MCP container,
+> via `${RELEASE_PUBLIC_URL}`; there is no separate MCP container,
 > port, image, or OIDC block in this compose stack.
 
 Both documents cross-reference each other. Every section that is lab-only
@@ -97,7 +97,7 @@ Container-internal DNS aliases:
 
 Each service is also published under an `*.example.digital.ai.local` alias on the `ask-release-net` bridge (e.g. `release`, `release-assistant`, `llm-service-api`). These aliases let the components address each other by the same FQDN the public URL uses, which keeps TLS SNI/cert SAN chains and Release's `RELEASE_PUBLIC_URL` / `RELEASE_ASSISTANT_PUBLIC_URL` consistent for local-lab testing. The short `service` hostnames still work for plain HTTP inside the bridge.
 
-Note: the MCP (Model Context Protocol) server is embedded inside Digital.ai Release at the `${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` path. There is no separate MCP container in this stack; the Assistant connects directly to `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT}` inside the bridge.
+Note: the MCP (Model Context Protocol) server is embedded inside Digital.ai Release at the `${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` path. There is no separate MCP container in this stack; the Assistant connects directly to `${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT}` inside the bridge.
 
 ## 3) Required network flows
 
@@ -295,7 +295,6 @@ cp .env.base .env
 - `OAUTH2_TOKEN_CLIENT_SECRET`
 - `OIDC_ISSUER_URI`
 - `RELEASE_PUBLIC_URL`
-- `RELEASE_INTERNAL_URL` (in-bridge URL the Assistant uses to reach Release and the embedded MCP endpoint)
 - `RELEASE_MCP_SERVER_ENDPOINT` (defaults to `/s/mcp`; override only if your Release image exposes the embedded MCP server at a different path)
 - `RELEASE_ASSISTANT_DB_URL_SUFFIX`, `RELEASE_ASSISTANT_DB_USERNAME`, `RELEASE_ASSISTANT_DB_PASSWORD` (defaults point at the local Postgres container)
 
@@ -543,7 +542,7 @@ be rerun after a PITR restore to bring the LLM DB schema forward
 ```
 
 The Assistant talks to the embedded MCP endpoint on Release (at
-`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`) using
+`${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`) using
 the user's bearer token (forwarded from the Assistant). The LLM
 service does not talk to Release directly.
 
@@ -569,13 +568,6 @@ RELEASE_PUBLIC_URL=https://release.corp.example.com:5516
 
 # Public Assistant URL (drives the assistant-url config and OIDC config).
 RELEASE_ASSISTANT_PUBLIC_URL=https://assistant.corp.example.com:8090
-
-# Internal URL the Assistant uses to reach Release (and its embedded
-# MCP endpoint at ${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}). Same as
-# RELEASE_PUBLIC_URL when there is no separate load balancer in front
-# of Release. Set to the in-cluster / private URL if the CORE services
-# run alongside Release in the same private network.
-RELEASE_INTERNAL_URL=https://release.corp.example.com:5516
 ```
 
 If the customer's Release is reachable over a private hostname that
@@ -584,12 +576,11 @@ the public `release.corp.example.com`), set:
 
 ```bash
 RELEASE_PUBLIC_URL=https://release.corp.example.com:5516   # browser / OIDC redirect
-RELEASE_INTERNAL_URL=https://release.internal:5516           # Assistant -> Release (private network), also base URL of embedded MCP
 ```
 
-The Assistant picks up `RELEASE_BASE_URL` from `RELEASE_INTERNAL_URL`
+The Assistant picks up `RELEASE_BASE_URL` from `RELEASE_PUBLIC_URL`
 (which is also the base URL of the embedded MCP endpoint at
-`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`); the
+`${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`); the
 Assistant's CORS allowed origin comes from `RELEASE_PUBLIC_URL`.
 
 #### 8.2.4 OIDC client config
@@ -627,9 +618,9 @@ After the CORE services are up:
 ```bash
 # 1) The Assistant can reach the Release (and its embedded MCP endpoint)
 docker compose -f docker-compose.yaml exec release-assistant \
-  curl -fS ${RELEASE_INTERNAL_URL}/login
+  curl -fS ${RELEASE_PUBLIC_URL}/login
 docker compose -f docker-compose.yaml exec release-assistant \
-  curl -fS "${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}"
+  curl -fS "${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}"
 
 # 2) End-to-end: log in to the Assistant UI, send a chat message that
 #    triggers a Release tool call (e.g. "list the first 5 templates
@@ -638,7 +629,7 @@ docker compose -f docker-compose.yaml exec release-assistant \
 ```
 
 If the Assistant cannot reach the embedded MCP endpoint, check the
-`RELEASE_INTERNAL_URL` host/port and `RELEASE_MCP_SERVER_ENDPOINT`
+`RELEASE_PUBLIC_URL` host/port and `RELEASE_MCP_SERVER_ENDPOINT`
 (default `/s/mcp`). If the chat fails with auth errors, verify the
 OIDC client config (§8.3) and that the user's bearer token has the
 `dai-svc` scope.
@@ -995,7 +986,7 @@ on the client.
 - The Assistant and LLM service derive their OIDC issuer from `OIDC_ISSUER_URI`; Release derives its own via `RELEASE_OIDC_ISSUER` (defaults to `OIDC_ISSUER_URI`). JWKS URIs are derived automatically.
 - Assistant uses `OIDC_ISSUER_URI` as Spring Security resource-server issuer-uri to validate inbound tokens.
 - LLM service validates JWT audience based on OIDC metadata; required audience is `dai-svc`.
-- The embedded MCP endpoint on Release is reached at `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`; auth is handled by the Release image's existing OIDC chain (same `RELEASE_OIDC_*` vars).
+- The embedded MCP endpoint on Release is reached at `${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`; auth is handled by the Release image's existing OIDC chain (same `RELEASE_OIDC_*` vars).
 - For production hardening, use strict issuer matching and avoid wildcard issuer regexes.
 
 ### 10.2 Secrets handling map
@@ -1197,8 +1188,8 @@ Derived from the hostnames and ports above. Override here when proxying in front
 |---|---|---|
 | `RELEASE_PUBLIC_URL` | `https://${RELEASE_HOSTNAME}:5516` | Digital.ai Release public URL used by the Assistant for CORS allowed origins and by the IdP client setup; also drives the OIDC redirect URIs by default |
 | `RELEASE_ASSISTANT_PUBLIC_URL` | `https://${ASSISTANT_HOSTNAME}:8090` | Public Assistant URL injected into `xl.features.ai.assistant-url` (when the local Release is in use) |
-| `RELEASE_INTERNAL_URL` | `http://release:${RELEASE_HTTP_PORT}` | In-bridge URL the Assistant uses to reach Release. Also the base URL of the embedded MCP endpoint (`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`). Different from the public URL when behind nginx |
-| `RELEASE_MCP_SERVER_ENDPOINT` | `/s/mcp` | Path the embedded MCP server is mounted at on the Release image; the full embedded MCP URL is `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT}`. Override only if your Release image exposes the MCP endpoint at a different path |
+| `RELEASE_PUBLIC_URL` | `http://release:${RELEASE_HTTP_PORT}` | In-bridge URL the Assistant uses to reach Release. Also the base URL of the embedded MCP endpoint (`${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`). Different from the public URL when behind nginx |
+| `RELEASE_MCP_SERVER_ENDPOINT` | `/s/mcp` | Path the embedded MCP server is mounted at on the Release image; the full embedded MCP URL is `${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT}`. Override only if your Release image exposes the MCP endpoint at a different path |
 
 ### Core auth and tenancy (`.env.base`)
 
@@ -1313,7 +1304,7 @@ When using the core-only mode (`docker compose up -d release-assistant`), config
 
 - Keep local LLM service containers stopped.
 - Ensure egress from Assistant to the external LLM service endpoint is allowed.
-- Keep `RELEASE_PUBLIC_URL`, `RELEASE_INTERNAL_URL`, `RELEASE_MCP_SERVER_ENDPOINT`, OIDC settings, and Assistant DB settings unchanged.
+- Keep `RELEASE_PUBLIC_URL`, `RELEASE_MCP_SERVER_ENDPOINT`, OIDC settings, and Assistant DB settings unchanged.
 - Validate with the core health-check sequence (Assistant) and an end-to-end Ask Release chat test.
 
 ### Assistant AI / LLM endpoint (env-driven overrides)
@@ -1495,7 +1486,7 @@ For change windows with strict uptime targets, front components with a load bala
 | Assistant | `/actuator/health/liveness` | HTTP 200 and liveness `UP` |
 | LLM Service | `/llm/utility/ping` | HTTP 200 |
 | Release (optional local) | `/s/actuator/health/liveness` | HTTP 200 |
-| Embedded MCP on Release | `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` | HTTP 200 (a successful `OPTIONS` or streamable-HTTP handshake) |
+| Embedded MCP on Release | `${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` | HTTP 200 (a successful `OPTIONS` or streamable-HTTP handshake) |
 
 > **Lab nginx** (only with `--profile with-nginx`) is a proxy with no
 > HTTP health endpoint of its own; confirm it is healthy via
@@ -1507,9 +1498,9 @@ For change windows with strict uptime targets, front components with a load bala
 ```bash
 # Assistant -> Release (and its embedded MCP endpoint)
 docker compose exec release-assistant \
-  curl -fsS "${RELEASE_INTERNAL_URL}/login"
+  curl -fsS "${RELEASE_PUBLIC_URL}/login"
 docker compose exec release-assistant \
-  curl -fsS "${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}"
+  curl -fsS "${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}"
 
 # Assistant -> LLM Service (local LLM mode)
 docker compose exec release-assistant curl -fsS "http://llm-service-api:9000/llm/utility/ping"
@@ -1524,7 +1515,7 @@ For nginx-fronted lab connectivity checks (only with
 | Symptom | Likely cause | First checks |
 |---|---|---|
 | LLM service fails to start | Bad DB credentials or invalid provider config | `docker compose logs llm-service-dbinit llm-service-api`, verify `LLM_DB_*` and provider JSON/base64 |
-| Assistant cannot reach Release's embedded MCP endpoint | DNS/port/path mismatch | verify `RELEASE_INTERNAL_URL` host/port; verify `RELEASE_MCP_SERVER_ENDPOINT` (default `/s/mcp`); confirm Release is reachable on the in-bridge alias from inside the Assistant container |
+| Assistant cannot reach Release's embedded MCP endpoint | DNS/port/path mismatch | verify `RELEASE_PUBLIC_URL` host/port; verify `RELEASE_MCP_SERVER_ENDPOINT` (default `/s/mcp`); confirm Release is reachable on the in-bridge alias from inside the Assistant container |
 | JWT validation errors | Issuer/JWKS/audience mismatch | verify `OIDC_ISSUER_URI` and `OIDC_JWK_SET_URI`; confirm the user's bearer token carries the `dai-svc` scope/audience |
 | LLM provider errors/timeouts | Invalid credentials, blocked egress, model unavailable | check provider credentials in `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG`, proxy and firewall egress |
 | Migration/dbinit failure | DB permissions or connectivity issue | check `llm-service-dbinit` logs and DB grants/hostname |
@@ -1545,7 +1536,7 @@ Debug logging knobs:
 2. Confirm Assistant endpoint: `curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness"`.
 3. In local LLM mode, confirm LLM endpoint: `curl -fsS "http://localhost:${LLM_SERVICE_PORT:-9000}/llm/utility/ping"`.
 4. Confirm the Assistant can reach the embedded MCP endpoint on Release:
-   `curl -fsS "${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}"` from inside the Assistant container.
+   `curl -fsS "${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}"` from inside the Assistant container.
 5. When using the lab nginx reverse proxy (`--profile with-nginx`), also confirm the proxy terminates TLS and routes to each active vhost - see [test-lab/README.md §5 verification](test-lab/README.md#5-reverse-proxy--https-ingress-production-grade-nginx) for the per-vhost curls.
 6. Run one end-to-end Ask Release prompt in Release UI and confirm a successful response.
 7. Run one RBAC negative test (user without access to a target object) and verify access is denied/scoped by Release permissions.
@@ -1864,7 +1855,7 @@ must trust the operator's CA chain to validate:
   call the LLM provider).
 
 The embedded MCP endpoint is reached by the Assistant at
-`${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`. When
+`${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`. When
 the Assistant reaches a customer-managed Release over HTTPS signed by
 a private CA, the trust knob is the Assistant's own JDK `cacerts`
 (the in-stack `release` image inherits the same trust posture via
@@ -1981,7 +1972,7 @@ docker compose -f docker-compose.yaml -f docker-compose.with-internal-ca.yaml \
     curl -fS https://${IDP_HOSTNAME}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration
 docker compose -f docker-compose.yaml -f docker-compose.with-internal-ca.yaml \
   exec release-assistant \
-    curl -fS "${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}"
+    curl -fS "${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}"
 docker compose -f docker-compose.yaml -f docker-compose.with-internal-ca.yaml \
   exec llm-service-api \
     curl -fS ${OIDC_ISSUER_URI}/.well-known/openid-configuration

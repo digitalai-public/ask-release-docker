@@ -20,7 +20,7 @@ How traffic flows in this quick start:
 
 - browser -> `http://release.example.digital.ai.local:5516`
 - Release -> Assistant (`RELEASE_ASSISTANT_PUBLIC_URL`)
-- Assistant -> Release embedded MCP endpoint `${RELEASE_INTERNAL_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` (internal docker network)
+- Assistant -> Release embedded MCP endpoint `${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}` (internal docker network)
 - Assistant -> local LLM service (`http://llm-service-api:9000/llm`)
 - OIDC auth -> local Keycloak over HTTP on `:5080`
 
@@ -75,7 +75,7 @@ Why these values matter:
 - `KEYCLOAK_LOCAL_ISSUER` / `OIDC_ISSUER_URI` point all auth validation to local Keycloak.
 - `AI_LLM_BASE_URL` switches Assistant to the in-stack LLM service.
 - `DAI_*` and `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` are required by the LLM service tenant/provider bootstrap.
-- `RELEASE_INTERNAL_URL` (defaults to `http://release:${RELEASE_HTTP_PORT}`) and `RELEASE_MCP_SERVER_ENDPOINT` (defaults to `/s/mcp`) point the Assistant at the embedded MCP endpoint on the in-bridge Release alias.
+- `RELEASE_MCP_SERVER_ENDPOINT` (defaults to `/s/mcp`) point the Assistant at the embedded MCP endpoint on the in-bridge Release alias.
 
 ## 3) Start infrastructure services first
 
@@ -102,21 +102,9 @@ docker compose --project-directory . \
 curl -fsS "http://localhost:${KEYCLOAK_MGMT_PORT:-15090}/health/ready"
 ```
 
-## 4) Run one-time LLM DB init
+## 4) Start application services
 
-`llm-service-dbinit` applies schema migrations and seed/provider bootstrap, then exits.
-
-```bash
-docker compose --project-directory . \
-  -f docker-compose.yaml \
-  -f test-lab/docker-compose.yaml \
-  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
-  up llm-service-dbinit
-```
-
-## 5) Start application services
-
-Now start Release, Assistant, and the LLM API.
+Now start Release, Assistant, and the LLM API (`llm-service-dbinit` will run as dependecy).
 
 ```bash
 docker compose --project-directory . \
@@ -126,7 +114,7 @@ docker compose --project-directory . \
   up -d llm-service-api release release-assistant
 ```
 
-## 6) Verify
+## 5) Verify
 
 Check container status:
 
@@ -162,7 +150,7 @@ First login suggestion: use `gandalf/gandalf` (admin-like) or
 `alice/alice` (developer-role testing). Full credential list:
 `test-lab/README.md` section `2.1`.
 
-## 7) Read logs from all running containers
+## 6) Read logs from all running containers
 
 Use the same compose file set and profiles to stream logs for every active
 service in this quick-start stack:
@@ -193,7 +181,7 @@ docker compose --project-directory . \
   logs -f release release-assistant llm-service-api keycloak postgres
 ```
 
-## 8) Tear down
+## 7) Tear down
 
 ```bash
 docker compose --project-directory . \

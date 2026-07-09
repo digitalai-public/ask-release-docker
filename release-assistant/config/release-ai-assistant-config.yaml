@@ -12,10 +12,7 @@
 #
 # The MCP endpoint is embedded inside Digital.ai Release and exposed at
 # ${RELEASE_BASE_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}. Both vars are
-# sourced from release-assistant/compose.yaml. Override RELEASE_BASE_URL
-# via RELEASE_INTERNAL_URL in your layered .env when you want the Assistant
-# to talk to Release over a private in-bridge address (e.g.
-# http://release:5516) while keeping the public RELEASE_PUBLIC_URL for CORS.
+# sourced from release-assistant/compose.yaml.
 # ----------------------------------------------------------------------------
 
 spring:
