@@ -699,10 +699,10 @@ trust stores.
 
 `.env` (customised from `.env.base`):
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.1.3-SNAPSHOT
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.0
 LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255
 LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.619
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.708
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -710,8 +710,8 @@ NGINX_IMAGE=nginx:1.31-alpine
 ASSISTANT_PORT=8090
 LLM_SERVICE_PORT=9000
 RELEASE_HTTP_PORT=5516
-KEYCLOAK_HTTP_PORT=5080
-KEYCLOAK_MGMT_PORT=15090
+KEYCLOAK_HTTP_PORT=25080
+KEYCLOAK_MGMT_PORT=25090
 POSTGRES_PORT=5432
 
 POSTGRES_HOSTNAME=postgres
@@ -773,10 +773,10 @@ docker compose \
 
 `.env`:
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.1.3-SNAPSHOT
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.0
 LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255
 LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.619
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.708
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -784,8 +784,8 @@ NGINX_IMAGE=nginx:1.31-alpine
 ASSISTANT_PORT=8090
 LLM_SERVICE_PORT=9000
 RELEASE_HTTP_PORT=5516
-KEYCLOAK_HTTP_PORT=5080
-KEYCLOAK_MGMT_PORT=15090
+KEYCLOAK_HTTP_PORT=25080
+KEYCLOAK_MGMT_PORT=25090
 POSTGRES_PORT=5432
 NGINX_HTTPS_PORT=5443
 
@@ -863,10 +863,10 @@ docker compose \
 
 `.env`:
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.1.3-SNAPSHOT
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.0
 LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255
 LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.619
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.708
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -874,8 +874,8 @@ NGINX_IMAGE=nginx:1.31-alpine
 ASSISTANT_PORT=8090
 LLM_SERVICE_PORT=9000
 RELEASE_HTTP_PORT=5516
-KEYCLOAK_HTTP_PORT=5080
-KEYCLOAK_MGMT_PORT=15090
+KEYCLOAK_HTTP_PORT=25080
+KEYCLOAK_MGMT_PORT=25090
 POSTGRES_PORT=5432
 NGINX_HTTPS_PORT=5443
 
@@ -958,10 +958,10 @@ docker compose \
 
 `.env`:
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.1.3-SNAPSHOT
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.0
 LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255
 LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.619
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.708
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -969,8 +969,8 @@ NGINX_IMAGE=nginx:1.31-alpine
 ASSISTANT_PORT=8090
 LLM_SERVICE_PORT=9000
 RELEASE_HTTP_PORT=5516
-KEYCLOAK_HTTP_PORT=5080
-KEYCLOAK_MGMT_PORT=15090
+KEYCLOAK_HTTP_PORT=25080
+KEYCLOAK_MGMT_PORT=25090
 POSTGRES_PORT=5432
 NGINX_HTTPS_PORT=5443
 
@@ -1213,7 +1213,7 @@ fallbacks live in the per-service test compose file
 
 | Variable | Default | Description |
 |---|---|---|
-| `RELEASE_IMAGE` | `xebialabsunsupported/xl-release:26.3.0-beta.619` | Local Release image (used by `--profile with-release`) |
+| `RELEASE_IMAGE` | `xebialabsunsupported/xl-release:26.3.0-beta.708` | Local Release image (used by `--profile with-release`) |
 | `KEYCLOAK_IMAGE` | `quay.io/keycloak/keycloak:26.6` | Local Keycloak image (used by `--profile with-keycloak`) |
 | `POSTGRES_IMAGE` | `postgres:18.4-alpine` | Postgres image (used by `--profile with-postgres` / `with-release`) |
 | `NGINX_IMAGE` | `nginx:1.31-alpine` | nginx image (used by `--profile with-nginx`) |
@@ -1228,8 +1228,8 @@ fallbacks live in the per-service test compose file
 | Variable | Default | Service | Description |
 |---|---:|---|---|
 | `RELEASE_HTTP_PORT` | `5516` | release | Host port the local Release publishes |
-| `KEYCLOAK_HTTP_PORT` | `5080` | keycloak | Host port for Keycloak HTTP listener |
-| `KEYCLOAK_MGMT_PORT` | `15090` | keycloak | Host port for Keycloak management/health |
+| `KEYCLOAK_HTTP_PORT` | `25080` | keycloak | Host port for Keycloak HTTP listener |
+| `KEYCLOAK_MGMT_PORT` | `25090` | keycloak | Host port for Keycloak management/health |
 | `POSTGRES_PORT` | `5432` | postgres | Host port for Postgres (drop the publish in the hardened overlay; postgres becomes internal-only) |
 | `NGINX_HTTPS_PORT` | `5443` | nginx | Host port the nginx proxy publishes for HTTPS |
 

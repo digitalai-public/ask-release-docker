@@ -6,11 +6,11 @@ services:
     command:
       - start-dev
       - --import-realm
-      - --http-port=${KEYCLOAK_HTTP_PORT:-5080}
+      - --http-port=${KEYCLOAK_CONTAINER_HTTP_PORT:-8080}
     volumes:
       - ./data:/opt/keycloak/data/import
     ports:
-      - "${KEYCLOAK_HTTP_PORT:-5080}:${KEYCLOAK_HTTP_PORT:-5080}"
+      - "${KEYCLOAK_HTTP_PORT:-25080}:${KEYCLOAK_CONTAINER_HTTP_PORT:-8080}"
       - "${KEYCLOAK_MGMT_PORT:-15090}:9000"
     hostname: ${IDP_HOSTNAME:-identity.example.digital.ai.local}
     healthcheck:

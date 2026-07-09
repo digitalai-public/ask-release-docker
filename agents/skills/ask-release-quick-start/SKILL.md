@@ -77,6 +77,31 @@ docker compose --project-directory . \
   up -d llm-service-api release release-assistant
 ```
 
+## After changing `.env`
+
+If you change environment variables in `.env` after services are already
+running, restart the affected services so they pick up the new values.
+
+Example (quick-start profile set):
+
+```bash
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  up -d llm-service-api release release-assistant keycloak
+```
+
+If DB-related env vars changed, include Postgres too:
+
+```bash
+docker compose --project-directory . \
+  -f docker-compose.yaml \
+  -f test-lab/docker-compose.yaml \
+  --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
+  up -d postgres llm-service-api release release-assistant keycloak
+```
+
 ## Verify
 
 ```bash
