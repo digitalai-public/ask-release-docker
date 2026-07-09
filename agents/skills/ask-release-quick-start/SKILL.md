@@ -9,11 +9,15 @@ Use this skill ONLY for setting up or validating the local HTTP lab stack docume
 
 ## Inputs to collect first
 
-Ask for missing env values before starting containers:
+Treat repository compose/env defaults as valid. Do not run extra preflight checks for image variables or other optional env keys.
+
+Only collect these required user-provided values before starting containers:
 
 - `AI_LLM_CHAT_MODEL`
 - `DAI_ACCOUNT_ID` (must be UUID: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
 - `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` (base64 JSON)
+
+All other values come from `.env.base` and the Quick Start overrides.
 
 If the user provides provider credentials instead of base64, generate base64 from provider JSON and write it to `.env`.
 
