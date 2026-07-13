@@ -12,8 +12,8 @@
 #   - release   : in-stack Digital.ai Release (with-release profile)
 #
 # Run this file together with the root docker-compose.yaml when you need the
-# full end-to-end stack. The core services (release-assistant, release-mcp,
-# llm-service) live in the root compose file and are configured to talk to
+# full end-to-end stack. The core services (release-assistant, llm-service-api,
+# llm-service-dbinit) live in the root compose file and are configured to talk to
 # these test services over the shared `ask-release-net` and `ask-release-data`
 # Docker bridge networks.
 #
