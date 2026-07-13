@@ -3,8 +3,8 @@
 #
 # Activates internal-CA trust for the in-stack `release` service (the only
 # JDK-based service in the test stack). Mirrors the production overlay at
-# docker-compose.with-internal-ca.yaml for the three CORE services
-# (release-assistant, release-mcp, llm-service-api).
+# docker-compose.with-internal-ca.yaml for the two CORE services
+# (release-assistant, llm-service-api).
 #
 # Usage (combined with both production and test overlays):
 #   docker compose \
