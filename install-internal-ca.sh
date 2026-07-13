@@ -21,7 +21,7 @@
 #
 # After running, restart the CORE services:
 #   docker compose -f docker-compose.yaml --profile with-llm-service \
-#     restart release-assistant release-mcp llm-service-api
+#     restart release-assistant llm-service-api
 #
 # See README.md §28 for the full procedure and lifecycle.
 # ----------------------------------------------------------------------------
