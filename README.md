@@ -1917,7 +1917,7 @@ every internal-CA-aware service in both the CORE and TEST stacks.
    In corporate environments where outbound Docker Hub access is blocked,
    install any JDK 11+ locally (the script already requires `keytool` on
    `PATH`) so the local path is taken and no docker pull is attempted.
-   Both output files are written with mode `0600`.
+   Both output files are written with mode `0644`.
 
 4. Add `-f docker-compose.with-internal-ca.yaml` to every `docker
    compose` invocation. For the full end-to-end stack (CORE + TEST),
