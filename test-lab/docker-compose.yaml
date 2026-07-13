@@ -7,7 +7,7 @@
 #   - keycloak  : in-stack OIDC identity provider (with-keycloak profile)
 #   - nginx     : TLS-terminating reverse proxy in front of every backend
 #                 (with-nginx profile)
-#   - postgres  : in-stack PostgreSQL for the assistant, MCP, LLM service,
+#   - postgres  : in-stack PostgreSQL for the assistant, LLM service,
 #                 and (optionally) Release databases (with-postgres profile)
 #   - release   : in-stack Digital.ai Release (with-release profile)
 #
