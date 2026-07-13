@@ -52,7 +52,7 @@ services:
       file: test-lab/nginx/compose.yaml
       service: nginx
     # No `depends_on` for backends here: nginx is part of the TEST compose
-    # and the backends (release-assistant, release-mcp, llm-service-api,
+    # and the backends (release-assistant, llm-service-api,
     # release, keycloak) live in the CORE compose (or in the TEST compose).
     # The two compose files are combined via `-f` at run time, so the proxy
     # starts before the backends and returns 502s until they come up. Pair
