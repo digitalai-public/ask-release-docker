@@ -8,7 +8,7 @@
 #
 # Outputs (idempotent — re-runs overwrite with the same content):
 #   certs/cacerts.jks    JDK truststore for release-assistant
-#   certs/ca-bundle.pem  OpenSSL bundle for release-mcp, llm-service-api
+#   certs/ca-bundle.pem  OpenSSL bundle for llm-service-api
 #
 # Both files are gitignored; they are deployment-specific artifacts, not
 # source-of-truth material.
