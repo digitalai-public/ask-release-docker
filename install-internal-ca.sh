@@ -135,7 +135,7 @@ chmod 0644 "${JKS}" "${PEM}"
 log "set 0644 permissions on ${JKS} and ${PEM}"
 
 log "done. activate the internal-CA trust overlay on your next docker compose run:"
-log "  # CORE-only stack (release-assistant, release-mcp, llm-service-api)"
+log "  # CORE-only stack (release-assistant, llm-service-api)"
 log "  docker compose \\"
 log "    -f docker-compose.yaml \\"
 log "    -f docker-compose.with-internal-ca.yaml \\"
