@@ -45,6 +45,6 @@ by the script) so the local path is taken.
 ## Rotation
 
 Re-run `install-internal-ca.sh` with the rotated CA bundle. The script is
-idempotent — it overwrites the JKS and PEM with the new content and resets
-both files to mode `0600`. Restart the CORE services to pick up the new
+idempotent — it overwrites the JKS and PEM with the new content and sets
+both files to mode `0644`. Restart the CORE services to pick up the new
 trust material.
