@@ -129,4 +129,8 @@ docker compose --project-directory . \
   -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
   down --remove-orphans
+# remove db data
+docker volume rm ask-release-postgres-data
+# clean generated files except .env
+git clean -fdx -e . env
 ```

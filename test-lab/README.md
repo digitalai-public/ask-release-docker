@@ -761,6 +761,10 @@ docker compose \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-release \
   down --remove-orphans
+# remove db data
+docker volume rm ask-release-postgres-data
+# clean generated files except .env
+git clean -fdx -e . env
 ```
 
 ### 8.2 https, with-postgres, with-release, digital.ai idp
@@ -851,6 +855,10 @@ docker compose \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-nginx --profile with-release \
   down --remove-orphans
+# remove db data
+docker volume rm ask-release-postgres-data
+# clean generated files except .env
+git clean -fdx -e . env
 ```
 
 ### 8.3 https, with-llm, with-postgres, with-release, digital.ai idp
@@ -945,6 +953,10 @@ docker compose \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-nginx --profile with-release \
   down --remove-orphans
+# remove db data
+docker volume rm ask-release-postgres-data
+# clean generated files except .env
+git clean -fdx -e . env
 ```
 
 ### 8.4 https, with-llm, with-postgres, with-release, with-keycloak
@@ -1056,6 +1068,10 @@ docker compose \
   -f test-lab/docker-compose.with-internal-ca.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-nginx --profile with-release \
   down --remove-orphans
+# remove db data
+docker volume rm ask-release-postgres-data
+# clean generated files except .env
+git clean -fdx -e . env
 ```
 
 ### 8.5 https, with-llm, with-release, with-keycloak (no in-stack Postgres)
