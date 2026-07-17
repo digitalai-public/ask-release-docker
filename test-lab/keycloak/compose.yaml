@@ -6,12 +6,13 @@ services:
     command:
       - start-dev
       - --import-realm
-      - --http-port=${KEYCLOAK_CONTAINER_HTTP_PORT:-8080}
+      - --http-port=${KEYCLOAK_HTTP_PORT:-25080}
+      - --http-management-port=${KEYCLOAK_MGMT_PORT:-25090}
     volumes:
       - ./data:/opt/keycloak/data/import
     ports:
-      - "${KEYCLOAK_HTTP_PORT:-25080}:${KEYCLOAK_CONTAINER_HTTP_PORT:-8080}"
-      - "${KEYCLOAK_MGMT_PORT:-15090}:9000"
+      - "${KEYCLOAK_HTTP_PORT:-25080}:${KEYCLOAK_HTTP_PORT:-25080}"
+      - "${KEYCLOAK_MGMT_PORT:-25090}:${KEYCLOAK_MGMT_PORT:-25090}"
     hostname: ${IDP_HOSTNAME:-identity.example.digital.ai.local}
     healthcheck:
       test: [ 'CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { java.net.URI uri = java.net.URI.create(args[0]); System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)uri.toURL().openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:9000/health/live' ]

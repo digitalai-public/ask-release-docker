@@ -99,7 +99,7 @@ docker compose --project-directory . \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
   ps
 
-curl -fsS "http://localhost:${KEYCLOAK_MGMT_PORT:-15090}/health/ready"
+curl -fsS "http://localhost:${KEYCLOAK_MGMT_PORT:-25090}/health/ready"
 ```
 
 ## 4) Start application services
@@ -132,7 +132,7 @@ Check health endpoints:
 curl -fsS "http://127.0.0.1:${RELEASE_HTTP_PORT:-5516}/s/actuator/health/liveness"
 curl -fsS "http://localhost:${ASSISTANT_PORT:-8090}/actuator/health/liveness"
 curl -fsS "http://localhost:${LLM_SERVICE_PORT:-9000}/llm/utility/ping"
-curl -fsS "http://localhost:${KEYCLOAK_MGMT_PORT:-15090}/health/ready"
+curl -fsS "http://localhost:${KEYCLOAK_MGMT_PORT:-25090}/health/ready"
 ```
 
 Notes:
@@ -140,7 +140,7 @@ Notes:
 - Some hosts resolve `localhost` to IPv6 first. If Release health returns
   `Empty reply from server`, use `127.0.0.1` as shown above.
 - Keycloak readiness is exposed on the management port
-  (`KEYCLOAK_MGMT_PORT`, default `15090`), not the public HTTP port.
+  (`KEYCLOAK_MGMT_PORT`, default `25090`), not the public HTTP port.
 
 Open:
 
