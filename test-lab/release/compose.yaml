@@ -40,7 +40,7 @@ services:
       # §28.3 for the activation procedure.
     volumes:
       - ./default-conf/xl-release.conf.template:/opt/xebialabs/xl-release-server/default-conf/xl-release.conf.template:ro
-      - ./conf:/opt/xebialabs/xl-release-server/conf
+      - ./conf:/opt/xebialabs/xl-release-server/conf:rw
       - ./logs:/opt/xebialabs/xl-release-server/logs:rw
       # ../../certs/cacerts.jks and ../../certs/ca-bundle.pem are mounted by
       # test-lab/docker-compose.with-internal-ca.yaml when internal-CA trust is

@@ -42,7 +42,7 @@ From repository root:
 cp .env.base .env
 ```
 
-Set or update these values in `.env`:
+Set or update these values in `.env` by appending following to the end of file:
 
 ```bash
 OAUTH2_SCOPES="openid"
