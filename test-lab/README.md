@@ -843,6 +843,8 @@ docker compose \
   ps
 ```
 
+Before opening Release in a browser, open `https://release-assistant.example.digital.ai.nginx:5443/actuator/health` and accept the self-signed certificate warning.
+
 Open `https://release.example.digital.ai.nginx:5443/`
 
 First login suggestion: use `gandalf/gandalf` (admin-like) or
@@ -943,6 +945,8 @@ docker compose \
   --profile with-postgres --profile with-llm-service --profile with-nginx --profile with-release \
   ps
 ```
+
+Before opening Release in a browser, open `https://release-assistant.example.digital.ai.nginx:5443/actuator/health` and accept the self-signed certificate warning.
 
 Open `https://release.example.digital.ai.nginx:5443/`
 
@@ -1055,6 +1059,8 @@ docker compose \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-nginx --profile with-release \
   ps
 ```
+
+Before opening Release in a browser, open `https://release-assistant.example.digital.ai.nginx:5443/actuator/health` and accept the self-signed certificate warning.
 
 Open `https://release.example.digital.ai.nginx:5443/`
 

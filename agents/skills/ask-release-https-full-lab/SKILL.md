@@ -110,13 +110,13 @@ curl -kfsS "https://release.example.digital.ai.nginx:5443/s/actuator/health/live
 curl -kfsS "https://identity.example.digital.ai.nginx:5443/realms/xl-platform/.well-known/openid-configuration"
 ```
 
+Before opening Release in a browser, open the assistant health URL and accept the certificate warning for the self-signed cert:
+
+- `https://release-assistant.example.digital.ai.nginx:5443/actuator/health`
+
 Open:
 
 - `https://release.example.digital.ai.nginx:5443/`
-
-Before first browser use, open the assistant health URL and accept the certificate warning for the self-signed cert:
-
-- `https://release-assistant.example.digital.ai.nginx:5443/actuator/health`
 
 ## Teardown
 

@@ -1117,6 +1117,11 @@ For the Postgres base image, prefer a specific minor (e.g. `postgres:18.6-alpine
 > network flows, production recommendations, verification,
 > troubleshooting).
 >
+> When using the local self-signed lab cert, first open
+> `${RELEASE_ASSISTANT_PUBLIC_URL}/actuator/health`
+> in a browser and accept the certificate warning before opening
+> `${RELEASE_PUBLIC_URL}`.
+>
 > For production, place a corporate load balancer or WAF in front of
 > the CORE services instead. The LB pattern is described in the
 > "Ingress / load balancer pattern" block of §10.5 above.
