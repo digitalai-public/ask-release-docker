@@ -1216,7 +1216,7 @@ These vars are not declared in `.env.base`; their `${VAR:-default}` fallbacks li
 |---|---|---|
 | `AI_MODEL_CHAT` | `llm` | Chat backend selector: `llm` (uses `ai.llm.*`), `openai`, or `anthropic` |
 | `AI_LLM_BASE_URL` | `https://api.staging.digital.ai/llm` | LLM endpoint URL (Digital.ai SaaS LLM by default; set to `http://llm-service-api:9000` for the local Docker LLM service) |
-| `AI_LLM_CHAT_MODEL` | `anthropic.claude-sonnet-4-6` | Model name returned by the LLM endpoint |
+| `AI_LLM_CHAT_MODEL` | `claude-sonnet-4-6` | Model name returned by the LLM endpoint |
 | `AI_LLM_CHAT_TEMPERATURE` | `0.3` | Sampling temperature |
 | `AI_LLM_CHAT_MAX_TOKENS` | `4096` | Max tokens per completion |
 | `RELEASE_ASSISTANT_DB_URL_SUFFIX` | `postgresql://${POSTGRES_HOSTNAME}:${POSTGRES_PORT}/dai_assistant` | JDBC host/port/db fragment used by Assistant to build the datasource URL (`DB_URL_SUFFIX` in the Spring datasource) |

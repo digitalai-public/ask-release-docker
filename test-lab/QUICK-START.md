@@ -77,6 +77,12 @@ Why these values matter:
 - `DAI_*` and `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` are required by the LLM service tenant/provider bootstrap.
 - `RELEASE_MCP_SERVER_ENDPOINT` (defaults to `/s/mcp`) point the Assistant at the embedded MCP endpoint on the in-bridge Release alias.
 
+Put your update for the following keys:
+
+- `AI_LLM_CHAT_MODEL` - Model name returned by the LLM endpoint (for example: `claude-sonnet-4-6`)
+- `DAI_ACCOUNT_ID` - Multi-tenant account ID (must be UUID in format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`, for test-lab purpose it can be any value)
+- `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` - Base64 encoded provider JSON (required for local LLM mode), check example of json files in the `llm-service` folder.
+
 ## 3) Start infrastructure services first
 
 We start stateful dependencies first (Postgres + Keycloak), then continue with

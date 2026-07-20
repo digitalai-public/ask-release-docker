@@ -76,7 +76,7 @@ spring:
       # (e.g. http://llm-service-api:9000) or to any approved external gateway.
       base-url: ${AI_LLM_BASE_URL:https://api.staging.digital.ai/llm}
       chat:
-        model: ${AI_LLM_CHAT_MODEL:anthropic.claude-sonnet-4-6}
+        model: ${AI_LLM_CHAT_MODEL:claude-sonnet-4-6}
         temperature: ${AI_LLM_CHAT_TEMPERATURE:0.3}
         stream-options:
           include-usage: true
