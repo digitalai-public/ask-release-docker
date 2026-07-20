@@ -1096,8 +1096,8 @@ For production, pin images to digests and run a vulnerability scan on every imag
 
 ```yaml
 # Resolve once:
-docker pull xebialabsunsupported/dai-release-assistant:0.2.0
-docker inspect --format='{{index .RepoDigests 0}}' xebialabsunsupported/dai-release-assistant:0.2.0
+docker pull xebialabsunsupported/dai-release-assistant:0.2.1
+docker inspect --format='{{index .RepoDigests 0}}' xebialabsunsupported/dai-release-assistant:0.2.1
 # Example output: xebialabsunsupported/dai-release-assistant@sha256:abc123...
 
 # Then in .env:
@@ -1147,9 +1147,9 @@ Override any var shown below in `.env`. The default values shown in the tables b
 
 | Variable | Default | Description |
 |---|---|---|
-| `RELEASE_ASSISTANT_IMAGE` | `xebialabsunsupported/dai-release-assistant:0.2.0` | Assistant image (CORE) |
-| `LLM_SERVICE_API_IMAGE` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255` | LLM service API image (CORE, used by `--profile with-llm-service`) |
-| `LLM_SERVICE_DBINIT_IMAGE` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
+| `RELEASE_ASSISTANT_IMAGE` | `xebialabsunsupported/dai-release-assistant:0.2.1` | Assistant image (CORE) |
+| `LLM_SERVICE_API_IMAGE` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271` | LLM service API image (CORE, used by `--profile with-llm-service`) |
+| `LLM_SERVICE_DBINIT_IMAGE` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
 
 > **Production image replacement**: the `xebialabsunsupported/*` references above are internal-only. For production documentation and production deployments, switch to the approved `xebialabs/*` image references per the §20 compatibility matrix.
 >
@@ -1597,7 +1597,7 @@ The following matrix captures the current tested Docker image set for this repos
 
 | Release Assistant | LLM Service API | LLM Service DBInit | Digital.ai Release | Status | Validation date | Owner |
 |---|---|---|---|---|---|---|
-| `xebialabsunsupported/dai-release-assistant:0.2.0` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.255` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.255` | `xebialabsunsupported/xl-release:26.3.0-beta.708` | Provisional validated set for internal testing | 2026-06-22 | Release Assistant engineering |
+| `xebialabsunsupported/dai-release-assistant:0.2.1` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271` | `xebialabsunsupported/xl-release:26.3.0-beta.716` | Provisional validated set for internal testing | 2026-06-22 | Release Assistant engineering |
 
 Compatibility guidance:
 
