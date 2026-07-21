@@ -74,7 +74,7 @@ docker compose --project-directory . \
   -f docker-compose.yaml \
   -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
-  up -d llm-service-api release release-assistant
+  up -d llm-service-api release release-assistant xl-cli-apply-permissions
 ```
 
 ## After changing `.env`
@@ -89,7 +89,7 @@ docker compose --project-directory . \
   -f docker-compose.yaml \
   -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
-  up -d llm-service-api release release-assistant keycloak
+  up -d llm-service-api release release-assistant keycloak xl-cli-apply-permissions
 ```
 
 If DB-related env vars changed, include Postgres too:
@@ -99,7 +99,7 @@ docker compose --project-directory . \
   -f docker-compose.yaml \
   -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
-  up -d postgres llm-service-api release release-assistant keycloak
+  up -d postgres llm-service-api release release-assistant keycloak xl-cli-apply-permissions
 ```
 
 ## Verify

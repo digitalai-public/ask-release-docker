@@ -84,7 +84,7 @@ docker compose \
   -f test-lab/docker-compose.yaml \
   -f test-lab/docker-compose.with-internal-ca.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-nginx --profile with-release \
-  up -d postgres llm-service-api keycloak nginx release release-assistant
+  up -d postgres llm-service-api keycloak nginx release release-assistant xl-cli-apply-permissions
 ```
 
 ## Verify

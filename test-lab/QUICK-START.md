@@ -117,7 +117,7 @@ docker compose --project-directory . \
   -f docker-compose.yaml \
   -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-release \
-  up -d llm-service-api release release-assistant
+  up -d llm-service-api release release-assistant xl-cli-apply-permissions
 ```
 
 ## 5) Verify
@@ -152,9 +152,17 @@ Open:
 
 `http://release.example.digital.ai.local:5516/`
 
-First login suggestion: use `gandalf/gandalf` (admin-like) or
-`alice/alice` (developer-role testing). Full credential list:
+First login suggestion: use `gandalf/gandalf`, `alice/alice`, or `bob/bob`.
+Full credential list:
 `test-lab/README.md` section `2.1`.
+
+Authorization note: in this lab setup, all authenticated users currently
+have global `admin` permissions in Release.
+
+Keycloak admin login (`admin/admin` by default):
+
+- Admin Console URL: `http://identity.example.digital.ai.local:25080/admin/`
+- Use credentials: `admin/admin`
 
 ## 6) Read logs from all running containers
 

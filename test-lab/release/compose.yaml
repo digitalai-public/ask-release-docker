@@ -57,3 +57,42 @@ services:
           - release
           - ${RELEASE_HOSTNAME:-release.example.digital.ai.local}
       ask-release-data:
+
+  xl-cli-apply-permissions:
+    image: ${XL_CLI_IMAGE:-xebialabsunsupported/xl-client:26.3.0-beta.716}
+    profiles: ["with-release"]
+    depends_on:
+      release:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: []
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        LOG_FILE="/logs/xl-cli-apply-permissions.log"
+        mkdir -p /logs
+        echo "[$$(date -u +'%Y-%m-%dT%H:%M:%SZ')] Starting xl-cli-apply-permissions" >> "$$LOG_FILE"
+        echo "Log file: $$LOG_FILE" >> "$$LOG_FILE"
+        printf '%s\n' \
+          'apiVersion: xl-release/v1' \
+          'kind: Permissions' \
+          'spec:' \
+          '  - global:' \
+          '      - role: Authenticated Users' \
+          '        permissions:' \
+          '          - admin' \
+          > /tmp/permissions.yaml
+        /opt/xebialabs/xl-client/xl apply \
+          --xl-release-url "http://release:5516" \
+          --xl-release-username "${RELEASE_ADMIN_USERNAME:-admin}" \
+          --xl-release-password "${RELEASE_ADMIN_PASSWORD:-admin}" \
+          -f /tmp/permissions.yaml >> "$$LOG_FILE" 2>&1
+        rc=$$?
+        echo "[$$(date -u +'%Y-%m-%dT%H:%M:%SZ')] Finished xl-cli-apply-permissions (exit=$$rc)" >> "$$LOG_FILE"
+        cat "$$LOG_FILE"
+        exit "$$rc"
+    volumes:
+      - ./logs:/logs:rw
+    networks:
+      ask-release-net:

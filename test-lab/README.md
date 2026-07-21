@@ -135,11 +135,13 @@ docker compose --project-directory . \
 docker compose --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-keycloak --profile with-release --profile with-postgres --profile with-llm-service up -d \
-    llm-service-api release-assistant release
+    llm-service-api release-assistant release xl-cli-apply-permissions
 ```
 
-First login suggestion: use `gandalf/gandalf` (admin-like roles) or
-`alice/alice` (developer-role testing).
+First login suggestion: use `gandalf/gandalf`, `alice/alice`, or `bob/bob`.
+
+Authorization note: in this lab setup, all authenticated users currently
+have global `admin` permissions in Release.
 
 Notes:
 
@@ -147,6 +149,12 @@ Notes:
   (inlined as `${KEYCLOAK_ADMIN_USER:-admin}` /
   `${KEYCLOAK_ADMIN_PASSWORD:-admin}` in `test-lab/keycloak/compose.yaml`).
   Override in your layered `.env` for any non-lab use.
+- Keycloak Admin Console login is available at
+  `http://identity.example.digital.ai.local:${KEYCLOAK_HTTP_PORT:-25080}/admin/`
+  (or your overridden `IDP_HOSTNAME`). Use
+  `${KEYCLOAK_ADMIN_USER:-admin}` / `${KEYCLOAK_ADMIN_PASSWORD:-admin}`.
+- `${KEYCLOAK_MGMT_PORT:-25090}` is the management/health listener
+  (`/health/*`) and is not intended for browser/admin login.
 - Keycloak uses an H2 in-memory database by default. To persist data
   across restarts, mount a host volume or external DB and set
   `DB_VENDOR` accordingly.
@@ -182,8 +190,9 @@ test users. In this lab setup, each user password equals the username.
 
 Recommended demo users:
 
-- `gandalf/gandalf` for admin-like role testing
-- `alice/alice` for developer-role testing
+- `gandalf/gandalf`
+- `alice/alice`
+- `bob/bob`
 
 Lab-only warning: these credentials are for local testing only and must not
 be used in shared, staging, or production environments.
@@ -350,8 +359,7 @@ Required setup before first start:
        llm-service-api release-assistant release nginx
      ```
 
-First login suggestion when local Keycloak is active: `gandalf/gandalf`
-or `alice/alice` (see §2.1).
+First login suggestion when local Keycloak is active: `gandalf/gandalf`, `alice/alice`, or `bob/bob` (see §2.1).
 
 4. Verify:
 
@@ -734,7 +742,7 @@ docker compose \
   --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-release \
-  up -d postgres release release-assistant
+  up -d postgres release release-assistant xl-cli-apply-permissions
 ```
 
 If your IdP / Release / Assistant are signed by an internal CA, also
@@ -825,7 +833,7 @@ docker compose \
   --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-nginx --profile with-release \
-  up -d postgres nginx release release-assistant
+  up -d postgres nginx release release-assistant xl-cli-apply-permissions
 ```
 
 If your IdP / Release / Assistant are signed by an internal CA, also
@@ -847,8 +855,7 @@ Before opening Release in a browser, open `https://release-assistant.example.dig
 
 Open `https://release.example.digital.ai.nginx:5443/`
 
-First login suggestion: use `gandalf/gandalf` (admin-like) or
-`alice/alice` (developer-role testing), see §2.1.
+First login suggestion: use `gandalf/gandalf`, `alice/alice`, or `bob/bob`, see §2.1.
 
 Destroy:
 ```bash
@@ -928,7 +935,7 @@ docker compose \
   --project-directory . \
   -f docker-compose.yaml -f test-lab/docker-compose.yaml \
   --profile with-postgres --profile with-llm-service --profile with-nginx --profile with-release \
-  up -d postgres llm-service-api nginx release release-assistant
+  up -d postgres llm-service-api nginx release release-assistant xl-cli-apply-permissions
 ```
 
 If your IdP / Release / Assistant / LLM backend are signed by an
@@ -1045,7 +1052,7 @@ docker compose \
   -f test-lab/docker-compose.yaml \
   -f test-lab/docker-compose.with-internal-ca.yaml \
   --profile with-postgres --profile with-llm-service --profile with-keycloak --profile with-nginx --profile with-release \
-  up -d postgres llm-service-api keycloak nginx release release-assistant
+  up -d postgres llm-service-api keycloak nginx release release-assistant xl-cli-apply-permissions
 ```
 
 Check:
@@ -1086,7 +1093,7 @@ Same as recipe 8.4 but drop `--profile with-postgres` and set
 `POSTGRES_HOSTNAME=<your-managed-postgres-host>` in `.env` when you
 want to use a customer-managed PostgreSQL.
 
-First login suggestion: use `gandalf/gandalf` or `alice/alice` (see §2.1).
+First login suggestion: use `gandalf/gandalf`, `alice/alice`, or `bob/bob` (see §2.1).
 
 ### 8.6 https, with-llm, with-postgres, with-keycloak (no in-stack Release)
 
@@ -1097,8 +1104,8 @@ The Assistant reaches the embedded MCP endpoint on the external
 Release via the `${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}`
 URL chain.
 
-First login suggestion when local Keycloak is in use: `gandalf/gandalf`
-or `alice/alice` (see §2.1).
+First login suggestion when local Keycloak is in use: `gandalf/gandalf`,
+`alice/alice`, or `bob/bob` (see §2.1).
 
 ### Notes
 

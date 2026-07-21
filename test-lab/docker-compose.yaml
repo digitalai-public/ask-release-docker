@@ -74,6 +74,12 @@ services:
       file: test-lab/release/compose.yaml
       service: release
 
+  xl-cli-apply-permissions:
+    profiles: ["with-release"]
+    extends:
+      file: test-lab/release/compose.yaml
+      service: xl-cli-apply-permissions
+
 volumes:
   ask_release_postgres_data:
     name: ask-release-postgres-data
