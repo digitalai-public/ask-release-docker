@@ -1609,9 +1609,12 @@
       "secret": "ab2088f6-2251-4233-9b22-e24db6a67483",
       "redirectUris": [
         "http://release.example.digital.ai.local:5516/oidc-login",
-        "https://release.example.digital.ai.nginx:5443/oidc-login"
+        "https://release.example.digital.ai.nginx:5443/oidc-login",
+        "http://release-assistant.example.digital.ai.local:8090/login/oauth2/code/ui-auth-server",
+        "https://release-assistant.example.digital.ai.nginx:5443/login/oauth2/code/ui-auth-server"
       ],
       "webOrigins": [
+        "http://release.example.digital.ai.local:5516",
         "https://release.example.digital.ai.nginx:5443"
       ],
       "notBefore": 0,
