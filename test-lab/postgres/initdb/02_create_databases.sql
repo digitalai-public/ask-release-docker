@@ -1,0 +1,2 @@
+CREATE DATABASE dai_assistant OWNER dai_assistant ENCODING 'UTF8' LC_COLLATE 'C' LC_CTYPE 'en_US.UTF-8' TEMPLATE template0;
+CREATE DATABASE dai_llm        OWNER dai_llm        ENCODING 'UTF8' LC_COLLATE 'C' LC_CTYPE 'en_US.UTF-8' TEMPLATE template0;

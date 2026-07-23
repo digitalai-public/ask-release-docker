@@ -1,0 +1,8 @@
+*.jceks
+*.vm
+*.conf
+*.xml
+*.properties
+*.yaml
+*.policy
+*.lic

@@ -1,0 +1,35 @@
+# ----------------------------------------------------------------------------
+# Internal-CA trust overlay for the Ask Release Docker stack.
+#
+# By default the two CORE services use system trust stores. When a
+# deployment needs internal corporate CA trust (for IdP / Release / LLM
+# endpoints whose certs are signed by a private chain), activate this
+# overlay by adding -f docker-compose.with-internal-ca.yaml to the
+# docker compose command:
+#
+#   docker compose \
+#     -f docker-compose.yaml \
+#     -f docker-compose.with-internal-ca.yaml \
+#     [--env-file .env.base] [--env-file .env-local] \
+#     --profile <profiles> \
+#     up -d
+#
+# Requires certs/cacerts.jks and certs/ca-bundle.pem at the repository
+# root. Generate with ./install-internal-ca.sh <corp-ca-bundle.pem>
+# (see README.md §28).
+# ----------------------------------------------------------------------------
+
+services:
+  release-assistant:
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+          -Djavax.net.ssl.trustStore=/app/truststore/cacerts.jks
+          -Djavax.net.ssl.trustStorePassword=changeit
+    volumes:
+      - ./certs/cacerts.jks:/app/truststore/cacerts.jks:ro
+
+  llm-service-api:
+    environment:
+      SSL_CERT_FILE: /app/certs/ca-bundle.pem
+    volumes:
+      - ./certs/ca-bundle.pem:/app/certs/ca-bundle.pem:ro

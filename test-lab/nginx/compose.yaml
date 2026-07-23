@@ -1,0 +1,32 @@
+services:
+  nginx:
+    image: ${NGINX_IMAGE:-nginx:1.31-alpine}
+    container_name: ask-release-nginx
+    restart: unless-stopped
+    hostname: nginx
+    profiles: ["with-nginx"]
+    ports:
+      - "${NGINX_HTTPS_PORT:-5443}:5443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./conf.d:/etc/nginx/conf.d:ro
+      # ./certs is bind-mounted from the repository-root ./certs directory.
+      # The following two files MUST be present for nginx to start:
+      #   tls.crt  - PEM-encoded cert (full chain in the same file)
+      #   tls.key  - PEM-encoded private key matching tls.crt
+      - ./certs:/etc/nginx/certs:ro
+      - ./logs:/var/log/nginx:rw
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      ask-release-net:
+        aliases:
+          - nginx
+          - ${NGINX_HOSTNAME:-nginx.example.digital.ai.local}
+          - ${NGINX_ASSISTANT_HOSTNAME:-}
+          - ${NGINX_RELEASE_HOSTNAME:-}
+          - ${NGINX_IDP_HOSTNAME:-}

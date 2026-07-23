@@ -1,0 +1,20 @@
+{
+  "type": "bedrock",
+  "config": {
+    "region_name": "us-west-2",
+    "api_version": null,
+    "config": {
+      "connect_timeout": 60,
+      "read_timeout": 180
+    },
+    "use_ssl": true,
+    "verify": null,
+    "endpoint_url": null,
+    "aws_access_key_id": "your_aws_access_key",
+    "aws_secret_access_key": "your_aws_secret_key",
+    "aws_session_token": null,
+    "aws_account_id": null,
+    "batch_role_arn": null,
+    "batch_s3_bucket": null
+  }
+}

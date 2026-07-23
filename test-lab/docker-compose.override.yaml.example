@@ -1,0 +1,71 @@
+# ----------------------------------------------------------------------------
+# Ask Release Docker - opt-in hardening overlay (TEST services)
+#
+# Activate by copying this file to test-lab/docker-compose.override.yaml:
+#   cp test-lab/docker-compose.override.yaml.example test-lab/docker-compose.override.yaml
+#
+# Compose auto-merges docker-compose.override.yaml with docker-compose.yaml.
+# To disable, simply delete the override file.
+#
+# What this overlay does:
+#   - Adds container hardening (no-new-privileges, cap_drop ALL, init, log rotation)
+#   - Sets CPU / memory / PID limits aligned to a small local-lab tier
+#   - Removes the postgres host port entirely (postgres becomes internal-only)
+#
+# Use this when running the combined local-lab stack with
+# `-f docker-compose.yaml -f test-lab/docker-compose.yaml`. The test stack runs
+# the in-stack Keycloak, nginx, postgres, and (optionally) Digital.ai Release
+# containers; it is sized for single-host dev/lab usage, not production.
+# ----------------------------------------------------------------------------
+
+x-hardening: &hardening
+  init: true
+  stop_grace_period: 30s
+  security_opt:
+    - "no-new-privileges:true"
+  cap_drop:
+    - ALL
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+services:
+  release:
+    <<: *hardening
+    cpus: "4"
+    mem_limit: 8g
+    mem_reservation: 4g
+    pids_limit: 512
+    ports:
+      - "127.0.0.1:${RELEASE_HTTP_PORT:-5516}:5516"
+
+  postgres:
+    <<: *hardening
+    cpus: "2"
+    mem_limit: 8g
+    mem_reservation: 4g
+    pids_limit: 256
+    # No ports: — postgres is internal-only on ask-release-data network.
+    # For host-side DB access, use:
+    #   docker compose exec postgres psql -U ${POSTGRES_ADMIN_USER:-postgres}
+
+  keycloak:
+    <<: *hardening
+    cpus: "1"
+    mem_limit: 2g
+    mem_reservation: 1g
+    pids_limit: 128
+    ports:
+      - "127.0.0.1:${KEYCLOAK_HTTP_PORT:-25080}:8080"
+      - "127.0.0.1:${KEYCLOAK_MGMT_PORT:-25090}:9000"
+
+  nginx:
+    <<: *hardening
+    cpus: "1"
+    mem_limit: 512m
+    mem_reservation: 256m
+    pids_limit: 64
+    ports:
+      - "127.0.0.1:${NGINX_HTTPS_PORT:-5443}:5443"

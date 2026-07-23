@@ -1,0 +1,12 @@
+# Never commit TLS material, keys, or chain files into the repository.
+tls.crt
+tls.key
+tls-chain.pem
+fullchain.pem
+*.csr
+*.p12
+*.pfx
+.acme/
+.well-known/acme-challenge/
+*.jks
+*.pem

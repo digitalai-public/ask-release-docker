@@ -1,0 +1,42 @@
+# ----------------------------------------------------------------------------
+# Internal-CA trust overlay for the test Ask Release Docker stack.
+#
+# Activates internal-CA trust for the in-stack `release` service (the only
+# JDK-based service in the test stack). Mirrors the production overlay at
+# docker-compose.with-internal-ca.yaml for the two CORE services
+# (release-assistant, llm-service-api).
+#
+# Usage (combined with both production and test overlays):
+#   docker compose \
+#     --project-directory . \
+#     -f docker-compose.yaml \
+#     -f test-lab/docker-compose.yaml \
+#     -f docker-compose.with-internal-ca.yaml \
+#     -f test-lab/docker-compose.with-internal-ca.yaml \
+#     [--env-file .env-base] [--env-file .env-local] \
+#     --profile with-postgres --profile with-release \
+#     --profile with-keycloak --profile with-nginx \
+#     --profile with-llm-service \
+#     up -d
+#
+# Requires certs/cacerts.jks and certs/ca-bundle.pem at the repository
+# root. Generate with ./install-internal-ca.sh <corp-ca-bundle.pem>
+# (see README.md §28).
+#
+# The Release service is Java/Spring Boot, so it consumes the JDK
+# truststore (cacerts.jks) via JAVA_TOOL_OPTIONS. The PEM bundle
+# (ca-bundle.pem) is mounted for parity with the production overlay and
+# future-proofing; the Release image does not currently consume it but
+# keeping the same artifact set on every internal-CA overlay simplifies
+# rotation policy (one `install-internal-ca.sh` run covers all services).
+# ----------------------------------------------------------------------------
+
+services:
+  release:
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+          -Djavax.net.ssl.trustStore=/opt/xebialabs/xl-release-server/truststore/cacerts.jks
+          -Djavax.net.ssl.trustStorePassword=changeit
+    volumes:
+      - ./certs/cacerts.jks:/opt/xebialabs/xl-release-server/truststore/cacerts.jks:ro
+      - ./certs/ca-bundle.pem:/opt/xebialabs/xl-release-server/certs/ca-bundle.pem:ro

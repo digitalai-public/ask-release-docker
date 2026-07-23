@@ -1,0 +1,7 @@
+AGENTS-FULL.md
+TODO.md
+.env
+.env-*
+certs/cacerts.jks
+certs/ca-bundle.pem
+release-assistant/logs/

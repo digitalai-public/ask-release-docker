@@ -1,0 +1,104 @@
+# ----------------------------------------------------------------------------
+# Ask Release Docker - test-lab/lab infrastructure
+#
+# This compose file bundles every support service that exists only for local
+# labs and end-to-end testing:
+#
+#   - keycloak  : in-stack OIDC identity provider (with-keycloak profile)
+#   - nginx     : TLS-terminating reverse proxy in front of every backend
+#                 (with-nginx profile)
+#   - postgres  : in-stack PostgreSQL for the assistant, LLM service,
+#                 and (optionally) Release databases (with-postgres profile)
+#   - release   : in-stack Digital.ai Release (with-release profile)
+#
+# Run this file together with the root docker-compose.yaml when you need the
+# full end-to-end stack. The core services (release-assistant, llm-service-api,
+# llm-service-dbinit) live in the root compose file and are configured to talk to
+# these test services over the shared `ask-release-net` and `ask-release-data`
+# Docker bridge networks.
+#
+# IMPORTANT: paths in `extends` are project-root-relative because Compose
+# resolves all `extends` paths against the project directory of the first
+# `-f` file (or `--project-directory`). Always invoke with
+# `--project-directory .` from the repository root:
+#
+#   # Combined end-to-end stack (typical local lab)
+#   docker compose \
+#     --project-directory . \
+#     -f docker-compose.yaml \
+#     -f test-lab/docker-compose.yaml \
+#     --profile with-postgres --profile with-release \
+#     --profile with-keycloak --profile with-nginx \
+#     --profile with-llm-service \
+#     up -d
+#
+# Both networks are also declared in ../docker-compose.yaml so the core
+# compose can stand alone in production. The declarations are idempotent
+# because they map to a single named resource.
+# ----------------------------------------------------------------------------
+
+name: ask-release-docker-test
+
+services:
+  keycloak:
+    profiles: ["with-keycloak"]
+    extends:
+      file: test-lab/keycloak/compose.yaml
+      service: keycloak
+
+  nginx:
+    profiles: ["with-nginx"]
+    extends:
+      file: test-lab/nginx/compose.yaml
+      service: nginx
+    # No `depends_on` for backends here: nginx is part of the TEST compose
+    # and the backends (release-assistant, llm-service-api,
+    # release, keycloak) live in the CORE compose (or in the TEST compose).
+    # The two compose files are combined via `-f` at run time, so the proxy
+    # starts before the backends and returns 502s until they come up. Pair
+    # the TEST compose with the CORE compose:
+    #   docker compose \
+    #     --project-directory . \
+    #     -f docker-compose.yaml -f test-lab/docker-compose.yaml \
+    #     --profile with-nginx ... up -d
+
+  postgres:
+    profiles: ["with-postgres"]
+    extends:
+      file: test-lab/postgres/compose.yaml
+      service: postgres
+
+  release:
+    profiles: ["with-release"]
+    extends:
+      file: test-lab/release/compose.yaml
+      service: release
+
+  xl-cli-apply-permissions:
+    profiles: ["with-release"]
+    extends:
+      file: test-lab/release/compose.yaml
+      service: xl-cli-apply-permissions
+
+volumes:
+  ask_release_postgres_data:
+    name: ask-release-postgres-data
+
+networks:
+  ask-release-net:
+    name: ask-release-net
+    driver: bridge
+  ask-release-data:
+    name: ask-release-data
+    driver: bridge
+    internal: false
+
+# ----------------------------------------------------------------------------
+# Shared networks / volume notes:
+# ask-release-net  - service mesh (all backends + nginx share DNS aliases here)
+# ask-release-data - data tier (postgres + backends that read/write DBs)
+# ask_release_postgres_data - named volume hosting the postgres data dir
+# These resources are also declared in ../docker-compose.yaml so the core
+# compose can stand alone in production. The declarations are idempotent
+# because they map to a single named resource.
+# ----------------------------------------------------------------------------

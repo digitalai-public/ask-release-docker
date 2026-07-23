@@ -1,0 +1,37 @@
+services:
+  keycloak:
+    container_name: ask-release-keycloak
+    image: ${KEYCLOAK_IMAGE}
+    # see https://www.keycloak.org/server/containers for more details
+    command:
+      - start-dev
+      - --import-realm
+      - --http-port=${KEYCLOAK_HTTP_PORT:-25080}
+      - --http-management-port=${KEYCLOAK_MGMT_PORT:-25090}
+    volumes:
+      - ./data:/opt/keycloak/data/import
+    ports:
+      - "${KEYCLOAK_HTTP_PORT:-25080}:${KEYCLOAK_HTTP_PORT:-25080}"
+      - "${KEYCLOAK_MGMT_PORT:-25090}:${KEYCLOAK_MGMT_PORT:-25090}"
+    hostname: ${IDP_HOSTNAME:-identity.example.digital.ai.local}
+    healthcheck:
+      test: [ 'CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { java.net.URI uri = java.net.URI.create(args[0]); System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)uri.toURL().openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:9000/health/live' ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      DB_VENDOR: H2
+      KC_HOSTNAME: ${KEYCLOAK_PROTOCOL:-http}://${KEYCLOAK_HOSTNAME:-${IDP_HOSTNAME:-identity.example.digital.ai.local}}:${KEYCLOAK_PORT:-${KEYCLOAK_HTTP_PORT:-5080}}
+    networks:
+      ask-release-net:
+        aliases:
+          - keycloak
+          - ${IDP_HOSTNAME:-identity.example.digital.ai.local}

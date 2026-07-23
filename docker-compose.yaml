@@ -1,0 +1,67 @@
+# ----------------------------------------------------------------------------
+# Ask Release Docker - core services
+#
+# This compose file ships the production surface of Ask Release:
+#
+#   - release-assistant : the Ask Release web UI and chat backend
+#   - llm-service-api   : local LLM provider gateway (optional, with-llm-service)
+#   - llm-service-dbinit: one-shot database seeder for the LLM service
+#
+# Test/lab-only services (Keycloak, nginx, Postgres, in-stack Release) live in
+# test-lab/docker-compose.yaml and are activated via their own profiles. Combine
+# the two compose files with `-f test-lab/docker-compose.yaml` when you want the
+# full end-to-end stack. See test-lab/docker-compose.yaml for details.
+#
+# Note: The MCP (Model Context Protocol) is no longer shipped as a separate
+# component. It is embedded inside Digital.ai Release and exposed at the
+# ${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp} path on the Release base URL. The
+# Assistant connects to that endpoint directly via ${RELEASE_BASE_URL}.
+# ----------------------------------------------------------------------------
+
+name: ask-release-docker
+
+services:
+  release-assistant:
+    extends:
+      file: release-assistant/compose.yaml
+      service: release-assistant
+
+  llm-service-dbinit:
+    profiles: ["init", "with-llm-service"]
+    extends:
+      file: llm-service/compose.yaml
+      service: llm-service-dbinit
+
+  llm-service-api:
+    profiles: ["with-llm-service"]
+    extends:
+      file: llm-service/compose.yaml
+      service: llm-service-api
+    depends_on:
+      llm-service-dbinit:
+        condition: service_completed_successfully
+        required: false
+
+volumes:
+  ask_release_postgres_data:
+    name: ask-release-postgres-data
+
+networks:
+  ask-release-net:
+    name: ask-release-net
+    driver: bridge
+    internal: false
+  ask-release-data:
+    name: ask-release-data
+    driver: bridge
+    internal: false
+
+# ----------------------------------------------------------------------------
+# Shared networks / volume notes:
+# ask-release-net  - service mesh (all backends + nginx share DNS aliases here)
+# ask-release-data - data tier (postgres + backends that read/write DBs)
+# ask_release_postgres_data - named volume hosting the postgres data dir
+# These resources are also declared in test-lab/docker-compose.yaml so the test
+# compose can stand alone in labs. The declarations are idempotent because
+# they map to a single named resource.
+# ----------------------------------------------------------------------------

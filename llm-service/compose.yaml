@@ -1,0 +1,64 @@
+x-llm-common: &llm-common
+  DAI_DB_SERVER: ${LLM_DB_HOST:-${POSTGRES_HOSTNAME}}
+  DAI_DB_PORT: ${LLM_DB_PORT:-${POSTGRES_PORT}}
+  DAI_DB_USERNAME: ${LLM_DB_USERNAME:-dai_llm}
+  DAI_DB_PASSWORD: ${LLM_DB_PASSWORD:-dai_llm}
+  DAI_DB_DBNAME: ${LLM_DB_NAME:-dai_llm}
+  DAI_DB_ENCRYPTED: ${LLM_DB_ENCRYPTED:-false}
+  DAI_DB_ENCRYPTION_KEY: ${LLM_DB_ENCRYPTION_KEY:-}
+  LLM_SERVICE_DEFAULT_PROVIDER_NAME: ${LLM_SERVICE_DEFAULT_PROVIDER_NAME:-dai-openai}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-}
+
+services:
+  llm-service-dbinit:
+    image: ${LLM_SERVICE_DBINIT_IMAGE:-}
+    container_name: ask-release-llm-service-dbinit
+    restart: "no"
+    environment:
+      <<: *llm-common
+      LLM_SERVICE_DEFAULT_PROVIDER_CONFIG: ${LLM_SERVICE_DEFAULT_PROVIDER_CONFIG:?LLM_SERVICE_DEFAULT_PROVIDER_CONFIG must be set (base64-encoded JSON)}
+      DAI_ACCOUNT_ID: ${DAI_ACCOUNT_ID:-}
+      DAI_AUTH_ISSUER_PATTERN: ${DAI_AUTH_ISSUER_PATTERN:-}
+      DAI_FEATURE__PLAINTEXT_LOGGING: ${LLM_DBINIT_PLAINTEXT_LOGGING:-true}
+      DAI_SERVICE_LOG_LEVEL: ${LLM_DBINIT_LOG_LEVEL:-trace}
+    networks:
+      ask-release-net:
+      ask-release-data:
+
+  llm-service-api:
+    image: ${LLM_SERVICE_API_IMAGE:-}
+    container_name: ask-release-llm-service-api
+    restart: unless-stopped
+    hostname: llm-service-api
+    ports:
+      - "${LLM_SERVICE_PORT:-9000}:9000"
+    environment:
+      <<: *llm-common
+      DAI_ACCOUNT_ID: ${DAI_ACCOUNT_ID:-}
+      DAI_AUTH_ISSUER_PATTERN: ${DAI_AUTH_ISSUER_PATTERN:-}
+      # DAI_AUTH_DISCOVERY_URL: ${DAI_AUTH_DISCOVERY_URL:-}
+      # DAI_AUTH_TENANT_ID_CLAIM: ${DAI_AUTH_TENANT_ID_CLAIM:-tid}
+      # DAI_ACCOUNT_API_TOKEN: ${DAI_ACCOUNT_API_TOKEN:-}
+      DAI_FEATURE__JOB_SERVICES_INTEGRATION_ENABLED: ${LLM_JOB_SERVICES_INTEGRATION_ENABLED:-false}
+      DAI_FEATURE__USAGE_TRACKING_ENABLED: ${LLM_USAGE_TRACKING_ENABLED:-false}
+      DAI_FEATURE__PLAINTEXT_LOGGING: ${LLM_PLAINTEXT_LOGGING:-true}
+      DAI_SERVICE_LOG_LEVEL: ${LLM_LOG_LEVEL:-TRACE}
+      OPEN_TELEMETRY_ENABLED: ${LLM_OTEL_ENABLED:-false}
+      OTEL_TRACES_EXPORTER: ${LLM_OTEL_TRACES_EXPORTER:-otlp}
+      OTEL_METRICS_EXPORTER: ${LLM_OTEL_METRICS_EXPORTER:-otlp}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${LLM_OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${LLM_OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
+      OTEL_SERVICE_NAME: ${LLM_OTEL_SERVICE_NAME:-llm-service}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/llm/utility/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      ask-release-net:
+        aliases:
+          - llm-service-api
+      ask-release-data:

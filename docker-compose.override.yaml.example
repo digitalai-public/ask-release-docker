@@ -1,0 +1,54 @@
+# ----------------------------------------------------------------------------
+# Ask Release Docker - opt-in hardening overlay (CORE services)
+#
+# Activate by copying this file to docker-compose.override.yaml:
+#   cp docker-compose.override.yaml.example docker-compose.override.yaml
+#
+# Compose auto-merges docker-compose.override.yaml with docker-compose.yaml.
+# To disable, simply delete the override file.
+#
+# What this overlay does:
+#   - Adds container hardening (no-new-privileges, cap_drop ALL, init, log rotation)
+#   - Sets CPU / memory / PID limits aligned to the small sizing tier
+#   - Restricts host-port bindings to loopback (127.0.0.1)
+#
+# This overlay only covers the CORE services (release-assistant,
+# llm-service-api). Test-stack services (keycloak, nginx, postgres, release)
+# are local-lab infrastructure and are hardened through
+# test-lab/docker-compose.override.yaml.example instead.
+#
+# To customize per-tier sizing, edit the per-service cpus/mem_limit values.
+# For large tier, multiply these by 4x.
+# ----------------------------------------------------------------------------
+
+x-hardening: &hardening
+  init: true
+  stop_grace_period: 30s
+  security_opt:
+    - "no-new-privileges:true"
+  cap_drop:
+    - ALL
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+services:
+  release-assistant:
+    <<: *hardening
+    cpus: "2"
+    mem_limit: 4g
+    mem_reservation: 2g
+    pids_limit: 256
+    ports:
+      - "127.0.0.1:${ASSISTANT_PORT:-8090}:8090"
+
+  llm-service-api:
+    <<: *hardening
+    cpus: "2"
+    mem_limit: 6g
+    mem_reservation: 3g
+    pids_limit: 256
+    ports:
+      - "127.0.0.1:${LLM_SERVICE_PORT:-9000}:9000"

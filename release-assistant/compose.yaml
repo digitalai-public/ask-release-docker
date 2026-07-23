@@ -1,0 +1,49 @@
+services:
+  release-assistant:
+    image: ${RELEASE_ASSISTANT_IMAGE}
+    container_name: ask-release-assistant
+    restart: unless-stopped
+    hostname: release-assistant
+    ports:
+      - "${ASSISTANT_PORT:-8090}:8090"
+    environment:
+      OAUTH2_TOKEN_CLIENT_ID: ${OAUTH2_TOKEN_CLIENT_ID}
+      OAUTH2_TOKEN_CLIENT_SECRET: ${OAUTH2_TOKEN_CLIENT_SECRET}
+      OAUTH2_SCOPES: ${OAUTH2_SCOPES:-openid}
+      DB_URL_SUFFIX: ${RELEASE_ASSISTANT_DB_URL_SUFFIX:-postgresql://${POSTGRES_HOSTNAME}:${POSTGRES_PORT}/dai_assistant}
+      DB_USERNAME: ${RELEASE_ASSISTANT_DB_USERNAME:-dai_assistant}
+      DB_PASSWORD: ${RELEASE_ASSISTANT_DB_PASSWORD:-dai_assistant}
+      # RELEASE_BASE_URL drives both the Assistant's CORS allowed origin and
+      # the MCP server base URL inside the Assistant configmap (the MCP
+      # endpoint is embedded inside Digital.ai Release and exposed at
+      # ${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}).
+      RELEASE_BASE_URL: ${RELEASE_PUBLIC_URL}
+      RELEASE_MCP_SERVER_ENDPOINT: ${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}
+      OIDC_ISSUER_URI: ${ASSISTANT_OIDC_ISSUER_URI:-${OIDC_ISSUER_URI}}
+      OIDC_JWK_SET_URI: ${OIDC_JWK_SET_URI:-${OIDC_ISSUER_URI}/protocol/openid-connect/certs}
+      AI_MODEL_CHAT: ${AI_MODEL_CHAT:-llm}
+      AI_LLM_BASE_URL: ${AI_LLM_BASE_URL:-https://api.staging.digital.ai/llm}
+      AI_LLM_CHAT_MODEL: ${AI_LLM_CHAT_MODEL:-claude-sonnet-4-6}
+      AI_LLM_CHAT_TEMPERATURE: ${AI_LLM_CHAT_TEMPERATURE:-0.3}
+      AI_LLM_CHAT_MAX_TOKENS: ${AI_LLM_CHAT_MAX_TOKENS:-4096}
+      NO_PROXY: ${NO_PROXY:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: ${ASSISTANT_LOG_MAX_SIZE:-10m}
+        max-file: "${ASSISTANT_LOG_MAX_FILE:-5}"
+    volumes:
+      - ./config/release-ai-assistant-config.yaml:/app/config/release-ai-assistant-config.yaml:ro
+      - ./logs:/app/logs:rw
+    networks:
+      ask-release-net:
+        aliases:
+          - release-assistant
+          - ${ASSISTANT_HOSTNAME:-release-assistant.example.digital.ai.local}
+      ask-release-data:
