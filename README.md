@@ -179,8 +179,8 @@ Scaling considerations:
 - Docker Engine + Docker Compose plugin
 - Connectivity to image registry hosting:
   - `xebialabsunsupported/dai-release-assistant`
-  - `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api`
-  - `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit`
+  - `xebialabsunsupported/llm-service-api`
+  - `xebialabsunsupported/llm-service-dbinit`
 - WARNING: `xebialabsunsupported/*` images are for internal usage only. For production documentation and production deployments, use `xebialabs/*` images.
 - **OIDC identity provider** (Okta, Microsoft Entra ID, Ping Identity, Auth0, or any compliant OIDC provider) with JWKS endpoint reachable from Assistant and LLM service. For the full IdP client setup walkthrough, see §8.3.
 - **Digital.ai Release** instance reachable from the host running the CORE services on the HTTPS port (default `5516`). Minimum supported version: `26.1.3` (see §21). The optional `with-release` lab profile is documented in [test-lab/README.md §3](test-lab/README.md#3-local-digitalai-release--profile-with-release).
@@ -1096,8 +1096,8 @@ For production, pin images to digests and run a vulnerability scan on every imag
 
 ```yaml
 # Resolve once:
-docker pull xebialabsunsupported/dai-release-assistant:0.2.1
-docker inspect --format='{{index .RepoDigests 0}}' xebialabsunsupported/dai-release-assistant:0.2.1
+docker pull xebialabsunsupported/dai-release-assistant:0.2.4
+docker inspect --format='{{index .RepoDigests 0}}' xebialabsunsupported/dai-release-assistant:0.2.4
 # Example output: xebialabsunsupported/dai-release-assistant@sha256:abc123...
 
 # Then in .env:
@@ -1152,9 +1152,9 @@ Override any var shown below in `.env`. The default values shown in the tables b
 
 | Variable | Default | Description |
 |---|---|---|
-| `RELEASE_ASSISTANT_IMAGE` | `xebialabsunsupported/dai-release-assistant:0.2.1` | Assistant image (CORE) |
-| `LLM_SERVICE_API_IMAGE` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271` | LLM service API image (CORE, used by `--profile with-llm-service`) |
-| `LLM_SERVICE_DBINIT_IMAGE` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
+| `RELEASE_ASSISTANT_IMAGE` | `xebialabsunsupported/dai-release-assistant:0.2.4` | Assistant image (CORE) |
+| `LLM_SERVICE_API_IMAGE` | `xebialabsunsupported/llm-service-api:0.0.1.271` | LLM service API image (CORE, used by `--profile with-llm-service`) |
+| `LLM_SERVICE_DBINIT_IMAGE` | `xebialabsunsupported/llm-service-dbinit:0.0.1.271` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
 
 > **Production image replacement**: the `xebialabsunsupported/*` references above are internal-only. For production documentation and production deployments, switch to the approved `xebialabs/*` image references per the §20 compatibility matrix.
 >
@@ -1602,7 +1602,7 @@ The following matrix captures the current tested Docker image set for this repos
 
 | Release Assistant | LLM Service API | LLM Service DBInit | Digital.ai Release | Status | Validation date | Owner |
 |---|---|---|---|---|---|---|
-| `xebialabsunsupported/dai-release-assistant:0.2.1` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271` | `xebialabsunsupported/xl-release:26.3.0-beta.716` | Provisional validated set for internal testing | 2026-06-22 | Release Assistant engineering |
+| `xebialabsunsupported/dai-release-assistant:0.2.4` | `xebialabsunsupported/llm-service-api:0.0.1.271` | `xebialabsunsupported/llm-service-dbinit:0.0.1.271` | `xebialabsunsupported/xl-release:26.3.0-beta.728` | Provisional validated set for internal testing | 2026-06-22 | Release Assistant engineering |
 
 Compatibility guidance:
 

@@ -707,10 +707,10 @@ trust stores.
 
 `.env` (customised from `.env.base`):
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.1
-LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271
-LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.716
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.4
+LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.271
+LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.271
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.728
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -785,10 +785,10 @@ git clean -fdx -e . env
 
 `.env`:
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.1
-LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271
-LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.716
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.4
+LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.271
+LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.271
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.728
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -880,10 +880,10 @@ git clean -fdx -e . env
 
 `.env`:
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.1
-LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271
-LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.716
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.4
+LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.271
+LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.271
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.728
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -981,10 +981,10 @@ git clean -fdx -e . env
 
 `.env`:
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.1
-LLM_SERVICE_API_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271
-LLM_SERVICE_DBINIT_IMAGE=docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.716
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.4
+LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.271
+LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.271
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.728
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
