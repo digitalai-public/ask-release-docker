@@ -103,7 +103,7 @@ Note: the MCP (Model Context Protocol) server is embedded inside Digital.ai Rele
 
 | Source | Destination | Port | Protocol | Required for |
 |---|---|---:|---|---|
-| User browser | Digital.ai Release | 5516 | HTTPS | Ask Release UI entry (direct) |
+| User browser | Digital.ai Release | 5516 | HTTPS | Release UI entry (direct) |
 | User browser | nginx ingress (only with `--profile with-nginx`) | 5443 | HTTPS | Single ingress for the Ask Release services that have a public vhost (Assistant, optionally Release / Keycloak) |
 | nginx ingress | Release / Assistant / Keycloak | 5516 / 8090 / 8080 | HTTP | vhost proxy to each backend that has a public vhost (only with `--profile with-nginx`) |
 | Release UI (browser context) | Release Assistant | 8090 | HTTPS | Chat requests (direct, when nginx is not in the path) |
@@ -179,8 +179,8 @@ Scaling considerations:
 - Docker Engine + Docker Compose plugin
 - Connectivity to image registry hosting:
   - `xebialabsunsupported/dai-release-assistant`
-  - `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api`
-  - `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit`
+  - `xebialabsunsupported/llm-service-api`
+  - `xebialabsunsupported/llm-service-dbinit`
 - WARNING: `xebialabsunsupported/*` images are for internal usage only. For production documentation and production deployments, use `xebialabs/*` images.
 - **OIDC identity provider** (Okta, Microsoft Entra ID, Ping Identity, Auth0, or any compliant OIDC provider) with JWKS endpoint reachable from Assistant and LLM service. For the full IdP client setup walkthrough, see §8.3.
 - **Digital.ai Release** instance reachable from the host running the CORE services on the HTTPS port (default `5516`). Minimum supported version: `26.1.3` (see §21). The optional `with-release` lab profile is documented in [test-lab/README.md §3](test-lab/README.md#3-local-digitalai-release--profile-with-release).
@@ -622,7 +622,7 @@ docker compose -f docker-compose.yaml exec release-assistant \
 docker compose -f docker-compose.yaml exec release-assistant \
   curl -fS "${RELEASE_PUBLIC_URL}${RELEASE_MCP_SERVER_ENDPOINT:-/s/mcp}"
 
-# 2) End-to-end: log in to the Assistant UI, send a chat message that
+# 2) End-to-end: log in to the Release UI, send a chat message that
 #    triggers a Release tool call (e.g. "list the first 5 templates
 #    in folder /Templates"). Verify the tool call succeeds in
 #    the assistant logs.
@@ -777,7 +777,7 @@ docker compose -f docker-compose.yaml exec release-assistant \
 docker compose -f docker-compose.yaml exec llm-service-api \
   curl -fS ${OIDC_ISSUER_URI}/.well-known/openid-configuration
 
-# 4) End-to-end: log in to the Assistant UI, verify the user is
+# 4) End-to-end: log in to the Release UI, verify the user is
 #    authenticated and the Assistant chat is functional.
 ```
 
@@ -1096,8 +1096,8 @@ For production, pin images to digests and run a vulnerability scan on every imag
 
 ```yaml
 # Resolve once:
-docker pull xebialabsunsupported/dai-release-assistant:0.2.1
-docker inspect --format='{{index .RepoDigests 0}}' xebialabsunsupported/dai-release-assistant:0.2.1
+docker pull xebialabsunsupported/dai-release-assistant:0.3.4
+docker inspect --format='{{index .RepoDigests 0}}' xebialabsunsupported/dai-release-assistant:0.3.4
 # Example output: xebialabsunsupported/dai-release-assistant@sha256:abc123...
 
 # Then in .env:
@@ -1152,9 +1152,9 @@ Override any var shown below in `.env`. The default values shown in the tables b
 
 | Variable | Default | Description |
 |---|---|---|
-| `RELEASE_ASSISTANT_IMAGE` | `xebialabsunsupported/dai-release-assistant:0.2.1` | Assistant image (CORE) |
-| `LLM_SERVICE_API_IMAGE` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271` | LLM service API image (CORE, used by `--profile with-llm-service`) |
-| `LLM_SERVICE_DBINIT_IMAGE` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
+| `RELEASE_ASSISTANT_IMAGE` | `xebialabsunsupported/dai-release-assistant:0.3.4` | Assistant image (CORE) |
+| `LLM_SERVICE_API_IMAGE` | `xebialabsunsupported/llm-service-api:0.0.1.284` | LLM service API image (CORE, used by `--profile with-llm-service`) |
+| `LLM_SERVICE_DBINIT_IMAGE` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
 
 > **Production image replacement**: the `xebialabsunsupported/*` references above are internal-only. For production documentation and production deployments, switch to the approved `xebialabs/*` image references per the §20 compatibility matrix.
 >
@@ -1200,7 +1200,7 @@ Derived from the hostnames and ports above. Override here when proxying in front
 
 | Variable | Default | Description |
 |---|---|---|
-| `OAUTH2_TOKEN_CLIENT_ID` | `replace-me` | OAuth2 client ID used by Assistant for token exchange and Swagger UI |
+| `OAUTH2_TOKEN_CLIENT_ID` | `replace-me` | OAuth2 client ID used by Assistant for token exchange |
 | `OAUTH2_TOKEN_CLIENT_SECRET` | `replace-me` | OAuth2 client secret used by Assistant |
 | `OIDC_ISSUER_URI` | `https://${IDP_HOSTNAME}/auth/realms/company` | Spring Security issuer-uri used by Assistant for inbound token validation; also consumed by the LLM service and Release (`RELEASE_OIDC_ISSUER`) via their default chains |
 
@@ -1217,7 +1217,6 @@ These vars are not declared in `.env.base`; their `${VAR:-default}` fallbacks li
 | `AI_MODEL_CHAT` | `llm` | Chat backend selector: `llm` (uses `ai.llm.*`), `openai`, or `anthropic` |
 | `AI_LLM_BASE_URL` | `https://api.staging.digital.ai/llm` | LLM endpoint URL (Digital.ai SaaS LLM by default; set to `http://llm-service-api:9000` for the local Docker LLM service) |
 | `AI_LLM_CHAT_MODEL` | `claude-sonnet-4-6` | Model name returned by the LLM endpoint |
-| `AI_LLM_CHAT_TEMPERATURE` | `0.3` | Sampling temperature |
 | `AI_LLM_CHAT_MAX_TOKENS` | `4096` | Max tokens per completion |
 | `RELEASE_ASSISTANT_DB_URL_SUFFIX` | `postgresql://${POSTGRES_HOSTNAME}:${POSTGRES_PORT}/dai_assistant` | JDBC host/port/db fragment used by Assistant to build the datasource URL (`DB_URL_SUFFIX` in the Spring datasource) |
 | `RELEASE_ASSISTANT_DB_USERNAME` | `dai_assistant` | Assistant DB username (`DB_USERNAME` in the Spring datasource) |
@@ -1602,7 +1601,7 @@ The following matrix captures the current tested Docker image set for this repos
 
 | Release Assistant | LLM Service API | LLM Service DBInit | Digital.ai Release | Status | Validation date | Owner |
 |---|---|---|---|---|---|---|
-| `xebialabsunsupported/dai-release-assistant:0.2.1` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-api:0.0.1.271` | `docker.usw2mgt.dev.digitalai.cloud/digital-ai/k6i-llm-service/llm-service-dbinit:0.0.1.271` | `xebialabsunsupported/xl-release:26.3.0-beta.716` | Provisional validated set for internal testing | 2026-06-22 | Release Assistant engineering |
+| `xebialabsunsupported/dai-release-assistant:0.3.4` | `xebialabsunsupported/llm-service-api:0.0.1.284` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | `xebialabsunsupported/xl-release:26.3.0-beta.811` | Provisional validated set for internal testing | 2026-06-22 | Release Assistant engineering |
 
 Compatibility guidance:
 

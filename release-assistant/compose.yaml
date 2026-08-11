@@ -24,7 +24,6 @@ services:
       AI_MODEL_CHAT: ${AI_MODEL_CHAT:-llm}
       AI_LLM_BASE_URL: ${AI_LLM_BASE_URL:-https://api.staging.digital.ai/llm}
       AI_LLM_CHAT_MODEL: ${AI_LLM_CHAT_MODEL:-claude-sonnet-4-6}
-      AI_LLM_CHAT_TEMPERATURE: ${AI_LLM_CHAT_TEMPERATURE:-0.3}
       AI_LLM_CHAT_MAX_TOKENS: ${AI_LLM_CHAT_MAX_TOKENS:-4096}
       NO_PROXY: ${NO_PROXY:-}
     healthcheck:

@@ -3,7 +3,7 @@
 #
 # This compose file ships the production surface of Ask Release:
 #
-#   - release-assistant : the Ask Release web UI and chat backend
+#   - release-assistant : the Ask Release chat backend
 #   - llm-service-api   : local LLM provider gateway (optional, with-llm-service)
 #   - llm-service-dbinit: one-shot database seeder for the LLM service
 #
