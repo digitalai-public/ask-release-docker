@@ -77,7 +77,6 @@ spring:
       base-url: ${AI_LLM_BASE_URL:https://api.staging.digital.ai/llm}
       chat:
         model: ${AI_LLM_CHAT_MODEL:claude-sonnet-4-6}
-        temperature: ${AI_LLM_CHAT_TEMPERATURE:0.3}
         stream-options:
           include-usage: true
         max-tokens: ${AI_LLM_CHAT_MAX_TOKENS:4096}
@@ -105,7 +104,7 @@ spring:
 app:
   # Vaadin admin UI
   ui:
-    enabled: true
+    enabled: false
   environment: integration
   # CORS Configuration (Required - configure for your frontend domains)
   cors:
@@ -205,20 +204,10 @@ management:
       export:
         enabled: ${OTEL_METRICS_EXPORT_OTLP_ENABLED:false}
         url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:}
-
 # DO NOT ENABLE SWAGGER UI IN PRODUCTION ENVIRONMENTS
 springdoc:
   swagger-ui:
-    oauth-flow:
-      authorizationUrl: ${OIDC_AUTH_URI:}
-      tokenUrl: ${OIDC_TOKEN_URI:}
-    oauth:
-      client-id: ${OAUTH2_TOKEN_CLIENT_ID:}
-      client-secret: ${OAUTH2_TOKEN_CLIENT_SECRET:}
-      use-pkce-with-authorization-code-grant: true
-      scopes: ${OAUTH2_SCOPES}
-      realm: intelligence-devops
-    enabled: true
+    enabled: false
   show-actuator: true
   api-docs:
     enabled: true

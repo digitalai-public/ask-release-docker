@@ -455,7 +455,7 @@ test-lab/nginx/certs/tls.key    # matching private key, PEM
 
 | Source | Destination | Port | Protocol | Required for |
 |---|---|---:|---|---|
-| User browser | nginx | 5443 | HTTPS | All Ask Release UI / API traffic (Assistant, Release, Keycloak login) |
+| User browser | nginx | 5443 | HTTPS | Release UI / API traffic (Assistant, Release, Keycloak login) |
 | nginx | release-assistant | 8090 | HTTP | Assistant vhost proxy |
 | nginx | release | 5516 | HTTP | Release vhost proxy (with `--profile with-release`) |
 | nginx | keycloak | 8080 | HTTP | Keycloak vhost proxy (with `--profile with-keycloak`) |
@@ -707,10 +707,10 @@ trust stores.
 
 `.env` (customised from `.env.base`):
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.4
-LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.271
-LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.271
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.728
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.3.4
+LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.284
+LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.284
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.811
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -785,10 +785,10 @@ git clean -fdx -e . env
 
 `.env`:
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.4
-LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.271
-LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.271
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.728
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.3.4
+LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.284
+LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.284
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.811
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -880,10 +880,10 @@ git clean -fdx -e . env
 
 `.env`:
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.4
-LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.271
-LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.271
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.728
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.3.4
+LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.284
+LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.284
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.811
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -981,10 +981,10 @@ git clean -fdx -e . env
 
 `.env`:
 ```bash
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.2.4
-LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.271
-LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.271
-RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.728
+RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant:0.3.4
+LLM_SERVICE_API_IMAGE=xebialabsunsupported/llm-service-api:0.0.1.284
+LLM_SERVICE_DBINIT_IMAGE=xebialabsunsupported/llm-service-dbinit:0.0.1.284
+RELEASE_IMAGE=xebialabsunsupported/xl-release:26.3.0-beta.811
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.6
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
