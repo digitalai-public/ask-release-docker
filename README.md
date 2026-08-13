@@ -136,14 +136,13 @@ Token flow:
 5. The Release image (embedded MCP) calls Release API with the same user security context.
 6. Release RBAC and permissions decide data visibility and action allow/deny.
 
-## 5) Sizing guidelines (TODO: review)
+## 5) Sizing guidelines
 
-Sizing depends on concurrent interactive users, number of parallel Ask Release requests, and model response latency.
+Sizing depends on concurrent interactive users, number of parallel Ask Release requests, and model response latency. Following numbers depend on usage patterns on the target installation and on external integrations so they are provided as recomentation and starting point after which additional tuning is possible for specific installation.
 
 Assumptions used for tiers:
 
 - 1 interactive user creates bursts of 1 request every 20-40 seconds.
-- Parallel requests are mostly concentrated at top of hour and release windows.
 - LLM inference compute is externalized to LLM provider; local sizing mainly covers orchestration, auth, and storage.
 
 | Tier | Concurrent users | Parallel Ask requests | Recommended vCPU | Recommended memory | Storage baseline |
@@ -1104,7 +1103,7 @@ docker inspect --format='{{index .RepoDigests 0}}' xebialabsunsupported/dai-rele
 RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant@sha256:abc123...
 ```
 
-For the Postgres base image, prefer a specific minor (e.g. `postgres:18.6-alpine`, set via `POSTGRES_IMAGE`) over the floating `postgres:18-alpine`. Upgrade cadence: review quarterly; bump manually after testing the new minor.
+For the Postgres base image, prefer a specific minor (e.g. `postgres:18.4-alpine`, set via `POSTGRES_IMAGE`) over the floating `postgres:18-alpine`. Upgrade cadence: review quarterly; bump manually after testing the new minor.
 
 ### 10.7 Reverse proxy / HTTPS ingress
 
@@ -1597,11 +1596,11 @@ Record evidence from a clean environment run:
 
 ## 20) Version compatibility matrix
 
-The following matrix captures the current tested Docker image set for this repository. The MCP server is embedded inside the Digital.ai Release image; it has no separate image to pin.
+The following matrix captures the current tested Docker image set for this repository. The MCP server is embedded inside the Digital.ai Release image.
 
 | Release Assistant | LLM Service API | LLM Service DBInit | Digital.ai Release | Status | Validation date | Owner |
 |---|---|---|---|---|---|---|
-| `xebialabsunsupported/dai-release-assistant:0.3.4` | `xebialabsunsupported/llm-service-api:0.0.1.284` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | `xebialabsunsupported/xl-release:26.3.0-beta.811` | Provisional validated set for internal testing | 2026-06-22 | Release Assistant engineering |
+| `xebialabsunsupported/dai-release-assistant:0.3.4` | `xebialabsunsupported/llm-service-api:0.0.1.284` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | `xebialabsunsupported/xl-release:26.3.0-beta.811` | Provisional validated set for internal testing | 2026-08-11 | Release Assistant engineering |
 
 Compatibility guidance:
 
@@ -1612,13 +1611,12 @@ Compatibility guidance:
 
 ## 21) Minimum supported versions
 
-These values are provisional and should be confirmed by release management before external publication.
-
-| Component | Minimum version | Status |
-|---|---|---|
-| Digital.ai Release | `26.1.3` or later | Provisional minimum with engineering sign-off pending |
-| Docker Engine | `24.x` or later | Provisional |
-| Docker Compose plugin | `2.20+` | Provisional |
+| Component | Minimum version |
+|---|---|
+| Digital.ai Release | `26.1.5` or later |
+| Postgresql | `18.4` or later | 
+| Docker Engine | Latest | 
+| Docker Compose plugin | Latest |
 
 ## 22) Known limitations
 
