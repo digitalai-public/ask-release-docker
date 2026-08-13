@@ -19,11 +19,11 @@ These models have been tested and are supported.
 
 These models do not work with AI Assistant.
 
-| Provider | Model |
+| Provider | Model | 
 |---|---|
-| OpenAI | GPT-5.6 Terra |
-| OpenAI | GPT-5.6 Sol |
-| OpenAI | GPT-5.6 Luna |
+| OpenAI | GPT-5.6 Terra | 
+| OpenAI | GPT-5.6 Sol | 
+| OpenAI | GPT-5.6 Luna | 
 
 ## Other Models
 
