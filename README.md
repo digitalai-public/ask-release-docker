@@ -752,7 +752,7 @@ OAUTH2_TOKEN_CLIENT_ID=<client-id>
 OAUTH2_TOKEN_CLIENT_SECRET=<client-secret>
 
 # Scopes requested at login
-OAUTH2_SCOPES="openid, dai-svc"
+OAUTH2_SCOPES="openid,dai-svc"
 
 # JWKS URI (usually derived from OIDC_ISSUER_URI; override only if
 # your IdP uses a non-standard layout)

@@ -206,5 +206,5 @@ docker compose --project-directory . \
 # remove db data
 docker volume rm ask-release-postgres-data
 # clean generated files except .env
-git clean -fdx -e . env
+git clean -fdx -e .env
 ```
