@@ -102,9 +102,6 @@ spring:
 
 # Application Configuration
 app:
-  # Vaadin admin UI
-  ui:
-    enabled: false
   environment: integration
   # CORS Configuration (Required - configure for your frontend domains)
   cors:
@@ -204,10 +201,3 @@ management:
       export:
         enabled: ${OTEL_METRICS_EXPORT_OTLP_ENABLED:false}
         url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:}
-# DO NOT ENABLE SWAGGER UI IN PRODUCTION ENVIRONMENTS
-springdoc:
-  swagger-ui:
-    enabled: false
-  show-actuator: true
-  api-docs:
-    enabled: true
