@@ -17,6 +17,8 @@ Collect these user-specific values before starting containers:
 - `DAI_ACCOUNT_ID`
 - `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` (base64 JSON)
 
+Use a model from `SUPPORTED-MODELS.md` for `AI_LLM_CHAT_MODEL`.
+
 Everything else should come from `.env.base` plus the recipe overrides below.
 
 If the user provides provider credentials instead of base64, generate base64 from provider JSON and write it to `.env`.

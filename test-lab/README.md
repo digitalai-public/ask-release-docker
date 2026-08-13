@@ -100,6 +100,7 @@ DAI_AUTH_ISSUER_PATTERN=${KEYCLOAK_LOCAL_ISSUER}
 # When using the local LLM service, also point the Assistant at it:
 # AI_LLM_BASE_URL=http://llm-service-api:9000
 # AI_LLM_CHAT_MODEL=<model name returned by the local LLM service>
+# Validated model list: see SUPPORTED-MODELS.md
 ```
 
 Quick start (local Keycloak + local LLM, no Release):

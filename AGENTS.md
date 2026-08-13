@@ -32,6 +32,10 @@ Use this agent guide to choose the right documentation source for setup and oper
   - `with-keycloak`
 - Includes `/etc/hosts`, cert generation, truststore generation, compose run order, verification, and teardown.
 
+### 5) `SUPPORTED-MODELS.md`
+- Canonical source for validated and unsupported `AI_LLM_CHAT_MODEL` values.
+- Update this file when model support changes, then reference it from setup docs.
+
 ## Selection rules
 
 - If the user asks for production/on-prem guidance, start with `README.md`.

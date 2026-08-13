@@ -1400,6 +1400,10 @@ Behavior notes:
 - If an alias already exists, it is left unchanged (no merge/overwrite).
 - Model order is preserved and used as priority.
 
+## Supported Models
+
+For the current validated model matrix, see [SUPPORTED-MODELS.md](SUPPORTED-MODELS.md).
+
 ## 13) Upgrade and operations notes
 
 - Pull new images for all components.
