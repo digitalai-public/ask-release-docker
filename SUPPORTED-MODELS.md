@@ -6,14 +6,14 @@ Use these validated models when setting `AI_LLM_CHAT_MODEL`.
 
 These models have been tested and are supported.
 
-| Provider | Model |
-|---|---|
-| Anthropic | Claude Sonnet 4.6 |
-| Anthropic | Claude Sonnet 5 |
-| Anthropic | Claude Opus 5 |
-| OpenAI | GPT-4o |
-| OpenAI | GPT-5.5 |
-| OpenAI | GPT-5.4 mini |
+| Provider | Model | Model Name (`AI_LLM_CHAT_MODEL`) |
+|---|---|---|
+| Anthropic | Claude Sonnet 4.6 | `claude-sonnet-4-6` |
+| Anthropic | Claude Sonnet 5 | `claude-sonnet-5` |
+| Anthropic | Claude Opus 5 | `claude-opus-5` |
+| OpenAI | GPT-4o | `gpt-4o` |
+| OpenAI | GPT-5.5 | `gpt-5.5` |
+| OpenAI | GPT-5.4 mini | `gpt-5.4-mini` |
 
 ## Unsupported Models
 
