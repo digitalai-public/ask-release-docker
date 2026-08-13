@@ -58,6 +58,8 @@ cp .env.base .env
 - `AI_LLM_BASE_URL=http://llm-service-api:${LLM_SERVICE_PORT}/llm`
 - `DAI_AUTH_ISSUER_PATTERN=${OIDC_ISSUER_URI}`
 
+Use `OAUTH2_SCOPES="openid"` only for this local Keycloak HTTPS lab recipe. For external IdP or production-style setups, use `OAUTH2_SCOPES="openid,dai-svc"`.
+
 4) Generate local self-signed certs for nginx:
 
 ```bash

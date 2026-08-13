@@ -260,6 +260,7 @@ Before starting the local Release profile
    your layered `.env` for your environment.
 2. Drop your `xl-release-license.lic` into `test-lab/release/conf/`
    (excluded by `test-lab/release/conf/.gitignore`).
+   If your Release image auto-downloads a trial license, this file may not be required for local labs.
 3. Do not commit real client secrets to `.env` - use a secret manager
    / `docker secrets` in production.
 
@@ -1026,6 +1027,8 @@ DAI_ACCOUNT_ID=replace-me
 DAI_AUTH_ISSUER_PATTERN=${OIDC_ISSUER_URI}
 LLM_SERVICE_DEFAULT_PROVIDER_CONFIG=e...
 ```
+
+Note: `OAUTH2_SCOPES="openid"` is intentional for this local Keycloak lab recipe. For external IdP or production-style setups, use `OAUTH2_SCOPES="openid,dai-svc"`.
 
 Self-signed certs:
 ```bash
