@@ -392,17 +392,10 @@ with the local Release), see
 
 #### 8.1.1 Topology
 
-```text
-   ┌──────────────────┐         ┌──────────────────────────┐
-   │ release-assistant│────────▶│                          │
-   └──────────────────┘         │  customer-managed        │
-                                 │  PostgreSQL              │
-   ┌──────────────────┐         │  (RDS / Aurora / Azure / │
-   │ llm-service-api  │────────▶│   on-prem)               │
-   └──────────────────┘         │                          │
-                                 │  dbs: dai_assistant,     │
-                                 │       dai_llm            │
-                                 └──────────────────────────┘
+```mermaid
+flowchart LR
+    Assistant[release-assistant] --> Postgres[(customer-managed PostgreSQL<br/>RDS / Aurora / Azure / on-prem<br/>dbs: dai_assistant, dai_llm)]
+    LlmApi[llm-service-api] --> Postgres
 ```
 
 Both the Assistant and the LLM service connect to the same Postgres
@@ -540,19 +533,10 @@ be rerun after a PITR restore to bring the LLM DB schema forward
 
 #### 8.2.1 Topology
 
-```text
-   ┌──────────────────┐         ┌──────────────────────────┐
-   │ release-assistant│────────▶│                          │
-   └──────────────────┘         │  customer-managed        │
-                                 │  Digital.ai Release      │
-                                 │  (existing on-prem or    │
-                                 │   hosted deployment)     │
-                                 │                          │
-                                 │  min version: 26.1.5     │
-                                 │  embedded MCP @ /s/mcp   │
-   ┌──────────────────┐         │
-   │ llm-service-api  │         │
-   └──────────────────┘         └──────────────────────────┘
+```mermaid
+flowchart LR
+    Assistant[release-assistant] --> Release[customer-managed Digital.ai Release<br/>existing on-prem or hosted deployment<br/>min version: 26.1.5<br/>embedded MCP at /s/mcp]
+    LlmApi[llm-service-api]
 ```
 
 The Assistant talks to the embedded MCP endpoint on Release (at
@@ -658,17 +642,10 @@ OIDC client config (§8.3) and that the user's bearer token has the
 
 #### 8.3.1 Topology
 
-```text
-   ┌──────────────────┐
-   │ release-assistant│──┐
-   └──────────────────┘  │
-                         │  OIDC discovery + JWKS + userinfo
-   ┌──────────────────┐  │
-   │ llm-service-api  │──┴──▶  ┌──────────────────────────┐
-   └──────────────────┘        │  enterprise OIDC IdP     │
-                               │  (Okta, Entra, Ping,     │
-                               │   Auth0, ...)            │
-                               └──────────────────────────┘
+```mermaid
+flowchart LR
+    Assistant[release-assistant] -->|OIDC discovery + JWKS + userinfo| IdP[enterprise OIDC IdP<br/>Okta / Entra / Ping / Auth0 / ...]
+    LlmApi[llm-service-api] -->|OIDC discovery + JWKS + userinfo| IdP
 ```
 
 The Assistant and LLM service validate bearer tokens from the same IdP.

@@ -389,10 +389,12 @@ Lives under `test-lab/nginx/`; requires `-f test-lab/docker-compose.yaml`.
 
 **Architecture:**
 
-```text
-   internet --HTTPS:5443--> [nginx] --HTTP--> [release-assistant :8090]
-                              |---HTTP--> [release           :5516]  (only --profile with-release)
-                              |---HTTP--> [keycloak          :8080]  (only --profile with-keycloak)
+```mermaid
+flowchart LR
+    Internet[internet] -->|HTTPS 5443| Nginx[nginx]
+    Nginx -->|HTTP 8090| Assistant[release-assistant]
+    Nginx -->|HTTP 5516| Release[release]
+    Nginx -->|HTTP 8080| Keycloak[keycloak]
 ```
 
 The Release MCP and local LLM service have no public vhost: they are
