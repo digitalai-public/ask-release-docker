@@ -73,6 +73,7 @@ Why these values matter:
 
 - `RELEASE_PUBLIC_URL` and `RELEASE_ASSISTANT_PUBLIC_URL` keep Release and Assistant links consistent for browser access.
 - `KEYCLOAK_LOCAL_ISSUER` / `OIDC_ISSUER_URI` point all auth validation to local Keycloak.
+- `OAUTH2_SCOPES="openid"` is intentional for this local Keycloak lab recipe. For external IdP or production-style setups, use `OAUTH2_SCOPES="openid,dai-svc"`.
 - `AI_LLM_BASE_URL` switches Assistant to the in-stack LLM service.
 - `DAI_*` and `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` are required by the LLM service tenant/provider bootstrap.
 - `RELEASE_MCP_SERVER_ENDPOINT` (defaults to `/s/mcp`) point the Assistant at the embedded MCP endpoint on the in-bridge Release alias.
@@ -206,5 +207,5 @@ docker compose --project-directory . \
 # remove db data
 docker volume rm ask-release-postgres-data
 # clean generated files except .env
-git clean -fdx -e . env
+git clean -fdx -e .env
 ```

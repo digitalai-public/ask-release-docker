@@ -260,6 +260,7 @@ Before starting the local Release profile
    your layered `.env` for your environment.
 2. Drop your `xl-release-license.lic` into `test-lab/release/conf/`
    (excluded by `test-lab/release/conf/.gitignore`).
+   If your Release image auto-downloads a trial license, this file may not be required for local labs.
 3. Do not commit real client secrets to `.env` - use a secret manager
    / `docker secrets` in production.
 
@@ -732,7 +733,7 @@ RELEASE_ASSISTANT_PUBLIC_URL=http://${ASSISTANT_HOSTNAME}:${ASSISTANT_PORT}
 
 OAUTH2_TOKEN_CLIENT_ID=replace-me
 OAUTH2_TOKEN_CLIENT_SECRET=replace-me
-OAUTH2_SCOPES="openid, dai-svc"
+OAUTH2_SCOPES="openid,dai-svc"
 OIDC_ISSUER_URI=https://${IDP_HOSTNAME}/auth/realms/onboarding
 ```
 
@@ -772,7 +773,7 @@ docker compose \
 # remove db data
 docker volume rm ask-release-postgres-data
 # clean generated files except .env
-git clean -fdx -e . env
+git clean -fdx -e .env
 ```
 
 ### 8.2 https, with-postgres, with-release, digital.ai idp
@@ -814,7 +815,7 @@ RELEASE_ASSISTANT_PUBLIC_URL=https://${NGINX_ASSISTANT_HOSTNAME}:${NGINX_HTTPS_P
 
 OAUTH2_TOKEN_CLIENT_ID=replace-me
 OAUTH2_TOKEN_CLIENT_SECRET=replace-me
-OAUTH2_SCOPES="openid, dai-svc"
+OAUTH2_SCOPES="openid,dai-svc"
 OIDC_ISSUER_URI=https://${IDP_HOSTNAME}/auth/realms/onboarding
 ```
 
@@ -867,7 +868,7 @@ docker compose \
 # remove db data
 docker volume rm ask-release-postgres-data
 # clean generated files except .env
-git clean -fdx -e . env
+git clean -fdx -e .env
 ```
 
 ### 8.3 https, with-llm, with-postgres, with-release, digital.ai idp
@@ -909,7 +910,7 @@ RELEASE_ASSISTANT_PUBLIC_URL=https://${NGINX_ASSISTANT_HOSTNAME}:${NGINX_HTTPS_P
 
 OAUTH2_TOKEN_CLIENT_ID=replace-me
 OAUTH2_TOKEN_CLIENT_SECRET=replace-me
-OAUTH2_SCOPES="openid, dai-svc"
+OAUTH2_SCOPES="openid,dai-svc"
 OIDC_ISSUER_URI=https://${IDP_HOSTNAME}/auth/realms/onboarding
 
 AI_LLM_BASE_URL=http://llm-service-api:${LLM_SERVICE_PORT}/llm
@@ -967,7 +968,7 @@ docker compose \
 # remove db data
 docker volume rm ask-release-postgres-data
 # clean generated files except .env
-git clean -fdx -e . env
+git clean -fdx -e .env
 ```
 
 ### 8.4 https, with-llm, with-postgres, with-release, with-keycloak
@@ -1027,6 +1028,8 @@ DAI_AUTH_ISSUER_PATTERN=${OIDC_ISSUER_URI}
 LLM_SERVICE_DEFAULT_PROVIDER_CONFIG=e...
 ```
 
+Note: `OAUTH2_SCOPES="openid"` is intentional for this local Keycloak lab recipe. For external IdP or production-style setups, use `OAUTH2_SCOPES="openid,dai-svc"`.
+
 Self-signed certs:
 ```bash
 SAN="DNS:release.example.digital.ai.nginx,DNS:release-assistant.example.digital.ai.nginx,DNS:identity.example.digital.ai.nginx"
@@ -1084,7 +1087,7 @@ docker compose \
 # remove db data
 docker volume rm ask-release-postgres-data
 # clean generated files except .env
-git clean -fdx -e . env
+git clean -fdx -e .env
 ```
 
 ### 8.5 https, with-llm, with-release, with-keycloak (no in-stack Postgres)
@@ -1242,7 +1245,7 @@ fallbacks live in the per-service test compose file
 
 | Variable | Default | Description |
 |---|---|---|
-| `RELEASE_IMAGE` | `xebialabsunsupported/xl-release:26.3.0-beta.716` | Local Release image (used by `--profile with-release`) |
+| `RELEASE_IMAGE` | `xebialabsunsupported/xl-release:26.3.0-beta.811` | Local Release image (used by `--profile with-release`) |
 | `KEYCLOAK_IMAGE` | `quay.io/keycloak/keycloak:26.6` | Local Keycloak image (used by `--profile with-keycloak`) |
 | `POSTGRES_IMAGE` | `postgres:18.4-alpine` | Postgres image (used by `--profile with-postgres` / `with-release`) |
 | `NGINX_IMAGE` | `nginx:1.31-alpine` | nginx image (used by `--profile with-nginx`) |

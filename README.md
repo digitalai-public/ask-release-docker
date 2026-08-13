@@ -136,23 +136,29 @@ Token flow:
 5. The Release image (embedded MCP) calls Release API with the same user security context.
 6. Release RBAC and permissions decide data visibility and action allow/deny.
 
-## 5) Sizing guidelines (TODO: review)
+## 5) Sizing guidelines
 
-Sizing depends on concurrent interactive users, number of parallel Ask Release requests, and model response latency.
+Sizing depends on concurrent interactive users, peak parallel Ask Release requests, model/provider latency, and external integration latency. The values below are starting points, not hard limits. Validate in your environment and tune after observing production-like load.
 
-Assumptions used for tiers:
+### 5.1 Scope and assumptions
 
-- 1 interactive user creates bursts of 1 request every 20-40 seconds.
-- Parallel requests are mostly concentrated at top of hour and release windows.
-- LLM inference compute is externalized to LLM provider; local sizing mainly covers orchestration, auth, and storage.
+- This sizing covers the Ask Release runtime components: release-assistant, llm-service-api, and PostgreSQL for assistant + llm-service data.
+- Digital.ai Release sizing is separate. The MCP endpoint is embedded in Release, so Release capacity must follow Digital.ai Release sizing guidance.
+- LLM inference compute is externalized to the LLM provider; local compute is primarily for orchestration, auth, and storage.
+- 1 interactive user typically generates bursty traffic (roughly 1 request every 20-40 seconds, not constant throughput).
+- Parallel Ask requests are estimated as ~25-35% of concurrent interactive users at peak.
 
-| Tier | Concurrent users | Parallel Ask requests | Recommended vCPU | Recommended memory | Storage baseline |
+### 5.2 Recommended starting tiers
+
+| Tier | Concurrent users | Parallel Ask requests (peak) | Recommended vCPU (host total) | Recommended memory (host total) | Storage baseline |
 |---|---:|---:|---:|---:|---:|
 | Small | 20-50 | 5-15 | 8 | 24 GiB | 100 GiB |
 | Medium | 50-200 | 15-60 | 16 | 48 GiB | 300 GiB |
 | Large | 200-600 | 60-180 | 32 | 96 GiB | 1 TiB |
 
-Suggested component split (starting point):
+Storage baseline includes primary data + WAL/headroom for growth. Backup/PITR storage is typically external to this host baseline.
+
+### 5.3 Suggested component split (starting point)
 
 - Small:
   - Assistant: 2 vCPU / 4-6 GiB
@@ -163,16 +169,24 @@ Suggested component split (starting point):
   - LLM Service API: 4 vCPU / 12-16 GiB
   - PostgreSQL: 4 vCPU / 16 GiB / fast SSD
 - Large:
-  - Assistant: 8 vCPU / 16-24 GiB (consider 2 replicas behind LB)
-  - LLM Service API: 8 vCPU / 24-32 GiB (consider 2+ replicas)
+  - Assistant: 8 vCPU / 16-24 GiB
+  - LLM Service API: 8 vCPU / 24-32 GiB
   - PostgreSQL: 8 vCPU / 32 GiB / provisioned IOPS SSD, backup + PITR
 
-Scaling considerations:
+### 5.4 Choosing a tier (quick method)
 
-- Scale Assistant and LLM Service API horizontally first for burst handling.
+1. Estimate peak concurrent users.
+2. Estimate peak parallel Ask requests (start with 30% of concurrent users).
+3. Select the nearest tier, deploy, then run a 60-120 minute production-like load test and adjust.
+
+### 5.5 Scaling and topology notes
+
+- Default deployment model in this repository is single-host and not HA.
+- In single-host mode, scale up first (CPU/memory and DB tuning).
+- For HA/multi-host topologies, scale Assistant and LLM Service API horizontally first for burst handling.
+- Replica guidance (for example, 2+ replicas behind a load balancer) applies to HA/multi-host designs, not the default single-host model in this repo.
 - The MCP endpoint is embedded inside Digital.ai Release; size Release itself per Digital.ai's Release sizing guidance (the embedded endpoint inherits Release's scale).
-- Track p95 end-to-end response latency, queue depth, DB connections, and token validation latency.
-- For large tier, place PostgreSQL on dedicated host/service and tune max connections and autovacuum.
+- For large tier, use dedicated PostgreSQL infrastructure and tune connection limits and autovacuum.
 
 ## 6) Prerequisites
 
@@ -183,7 +197,7 @@ Scaling considerations:
   - `xebialabsunsupported/llm-service-dbinit`
 - WARNING: `xebialabsunsupported/*` images are for internal usage only. For production documentation and production deployments, use `xebialabs/*` images.
 - **OIDC identity provider** (Okta, Microsoft Entra ID, Ping Identity, Auth0, or any compliant OIDC provider) with JWKS endpoint reachable from Assistant and LLM service. For the full IdP client setup walkthrough, see §8.3.
-- **Digital.ai Release** instance reachable from the host running the CORE services on the HTTPS port (default `5516`). Minimum supported version: `26.1.3` (see §21). The optional `with-release` lab profile is documented in [test-lab/README.md §3](test-lab/README.md#3-local-digitalai-release--profile-with-release).
+- **Digital.ai Release** instance reachable from the host running the CORE services on the HTTPS port (default `5516`). Minimum supported version: `26.1.5` (see §21). The optional `with-release` lab profile is documented in [test-lab/README.md §3](test-lab/README.md#3-local-digitalai-release--profile-with-release).
 - **PostgreSQL 14+** provisioned and reachable from the host running the CORE services. The optional `with-postgres` lab profile is documented in [test-lab/README.md §1](test-lab/README.md#1-overview). For the customer-managed Postgres production path, see §8.1.
 - LLM provider endpoint + credentials (or run the local LLM service via `--profile with-llm-service`)
 - For the lab `with-nginx` profile only: TLS cert (with full chain) and key at `test-lab/nginx/certs/tls.crt` and `test-lab/nginx/certs/tls.key`, covering every vhost you intend to serve. See [test-lab/README.md §5](test-lab/README.md#5-reverse-proxy--https-ingress-production-grade-nginx) for the cert format and a self-signed local-lab example. (The `with-nginx` profile is a lab profile; the production equivalent is a corporate load balancer or WAF in front of the CORE services.)
@@ -534,7 +548,7 @@ be rerun after a PITR restore to bring the LLM DB schema forward
                                  │  (existing on-prem or    │
                                  │   hosted deployment)     │
                                  │                          │
-                                 │  min version: 26.1.3     │
+                                 │  min version: 26.1.5     │
                                  │  embedded MCP @ /s/mcp   │
    ┌──────────────────┐         │
    │ llm-service-api  │         │
@@ -548,7 +562,7 @@ service does not talk to Release directly.
 
 #### 8.2.2 Prerequisites
 
-- Digital.ai Release `26.1.3` or later (see §21).
+- Digital.ai Release `26.1.5` or later (see §21).
 - A valid Release license (server-locked or license server).
 - An OIDC client set up on the customer Release (see §8.3 for the
   OIDC client setup walkthrough; the Release OIDC config mirrors the
@@ -738,7 +752,7 @@ OAUTH2_TOKEN_CLIENT_ID=<client-id>
 OAUTH2_TOKEN_CLIENT_SECRET=<client-secret>
 
 # Scopes requested at login
-OAUTH2_SCOPES="openid, dai-svc"
+OAUTH2_SCOPES="openid,dai-svc"
 
 # JWKS URI (usually derived from OIDC_ISSUER_URI; override only if
 # your IdP uses a non-standard layout)
@@ -1056,7 +1070,7 @@ docker compose -f docker-compose.yaml -f docker-compose.override.yaml up -d
 | Memory limit | unset | per-service (small tier) |
 | PID limit | unset | 128-512 per service |
 
-**Default resource limits (small tier - multiply by 4x for large):**
+**Default resource limits (small-tier baseline defaults; adjust per tier):**
 
 | Service | cpus | mem_limit | 
 |---|---:|---:|---:|
@@ -1104,7 +1118,7 @@ docker inspect --format='{{index .RepoDigests 0}}' xebialabsunsupported/dai-rele
 RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant@sha256:abc123...
 ```
 
-For the Postgres base image, prefer a specific minor (e.g. `postgres:18.6-alpine`, set via `POSTGRES_IMAGE`) over the floating `postgres:18-alpine`. Upgrade cadence: review quarterly; bump manually after testing the new minor.
+For the Postgres base image, prefer a specific minor (e.g. `postgres:18.4-alpine`, set via `POSTGRES_IMAGE`) over the floating `postgres:18-alpine`. Upgrade cadence: review quarterly; bump manually after testing the new minor.
 
 ### 10.7 Reverse proxy / HTTPS ingress
 
@@ -1597,11 +1611,11 @@ Record evidence from a clean environment run:
 
 ## 20) Version compatibility matrix
 
-The following matrix captures the current tested Docker image set for this repository. The MCP server is embedded inside the Digital.ai Release image; it has no separate image to pin.
+The following matrix captures the current tested Docker image set for this repository. The MCP server is embedded inside the Digital.ai Release image.
 
 | Release Assistant | LLM Service API | LLM Service DBInit | Digital.ai Release | Status | Validation date | Owner |
 |---|---|---|---|---|---|---|
-| `xebialabsunsupported/dai-release-assistant:0.3.4` | `xebialabsunsupported/llm-service-api:0.0.1.284` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | `xebialabsunsupported/xl-release:26.3.0-beta.811` | Provisional validated set for internal testing | 2026-06-22 | Release Assistant engineering |
+| `xebialabsunsupported/dai-release-assistant:0.3.4` | `xebialabsunsupported/llm-service-api:0.0.1.284` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | `xebialabsunsupported/xl-release:26.3.0-beta.811` | Provisional validated set for internal testing | 2026-08-11 | Release Assistant engineering |
 
 Compatibility guidance:
 
@@ -1612,13 +1626,12 @@ Compatibility guidance:
 
 ## 21) Minimum supported versions
 
-These values are provisional and should be confirmed by release management before external publication.
-
-| Component | Minimum version | Status |
-|---|---|---|
-| Digital.ai Release | `26.1.3` or later | Provisional minimum with engineering sign-off pending |
-| Docker Engine | `24.x` or later | Provisional |
-| Docker Compose plugin | `2.20+` | Provisional |
+| Component | Minimum version |
+|---|---|
+| Digital.ai Release | `26.1.5` or later |
+| Postgresql | `18.4` or later | 
+| Docker Engine | Latest | 
+| Docker Compose plugin | Latest |
 
 ## 22) Known limitations
 
