@@ -17,6 +17,8 @@ Only collect these required user-provided values before starting containers:
 - `DAI_ACCOUNT_ID` (must be UUID: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
 - `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` (base64 JSON)
 
+Use a model from `SUPPORTED-MODELS.md` for `AI_LLM_CHAT_MODEL`.
+
 All other values come from `.env.base` and the Quick Start overrides.
 
 If the user provides provider credentials instead of base64, generate base64 from provider JSON and write it to `.env`.

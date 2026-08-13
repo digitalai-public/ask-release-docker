@@ -80,7 +80,7 @@ Why these values matter:
 
 Put your update for the following keys:
 
-- `AI_LLM_CHAT_MODEL` - Model name returned by the LLM endpoint (for example: `claude-sonnet-4-6`)
+- `AI_LLM_CHAT_MODEL` - Model name returned by the LLM endpoint (for example: `claude-sonnet-4-6`). For the validated model list, see `SUPPORTED-MODELS.md`.
 - `DAI_ACCOUNT_ID` - Multi-tenant account ID (must be UUID in format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`, for test-lab purpose it can be any value)
 - `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` - Base64 encoded provider JSON (required for local LLM mode), check example of json files in the `llm-service` folder.
 
