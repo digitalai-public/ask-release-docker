@@ -1230,7 +1230,7 @@ These vars are not declared in `.env.base`; their `${VAR:-default}` fallbacks li
 
 | Variable | Compose default | Description |
 |---|---|---|
-| `LLM_SERVICE_DEFAULT_PROVIDER_NAME` | `dai-openai` | Seed provider name (required for local LLM mode); must start with `dai-` prefix |
+| `LLM_SERVICE_DEFAULT_PROVIDER_NAME` | `dai-default` | Seed provider name (required for local LLM mode); must start with `dai-` prefix |
 | `LLM_SERVICE_DEFAULT_PROVIDER_CONFIG` | _(empty)_ | Base64 encoded provider JSON (required for local LLM mode) |
 | `LLM_SERVICE_DEFAULT_SYSTEM_MODEL_ALIAS_MAPPINGS` | _(empty)_ | Optional base64 encoded JSON to seed initial system model alias mappings |
 | `LLM_DBINIT_LOG_LEVEL` | `trace` | LLM dbinit log level (`DAI_SERVICE_LOG_LEVEL`) |
