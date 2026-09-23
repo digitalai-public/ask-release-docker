@@ -192,10 +192,9 @@ Storage baseline includes primary data + WAL/headroom for growth. Backup/PITR st
 
 - Docker Engine + Docker Compose plugin
 - Connectivity to image registry hosting:
-  - `xebialabsunsupported/dai-release-assistant`
-  - `xebialabsunsupported/llm-service-api`
-  - `xebialabsunsupported/llm-service-dbinit`
-- WARNING: `xebialabsunsupported/*` images are for internal usage only. For production documentation and production deployments, use `xebialabs/*` images.
+  - `xebialabs/dai-release-assistant`
+  - `xebialabs/llm-service-api`
+  - `xebialabs/llm-service-dbinit`
 - **OIDC identity provider** (Okta, Microsoft Entra ID, Ping Identity, Auth0, or any compliant OIDC provider) with JWKS endpoint reachable from Assistant and LLM service. For the full IdP client setup walkthrough, see §8.3.
 - **Digital.ai Release** instance reachable from the host running the CORE services on the HTTPS port (default `5516`). Minimum supported version: `26.1.5` (see §21). The optional `with-release` lab profile is documented in [test-lab/README.md §3](test-lab/README.md#3-local-digitalai-release--profile-with-release).
 - **PostgreSQL 14+** provisioned and reachable from the host running the CORE services. The optional `with-postgres` lab profile is documented in [test-lab/README.md §1](test-lab/README.md#1-overview). For the customer-managed Postgres production path, see §8.1.
@@ -1087,12 +1086,12 @@ For production, pin images to digests and run a vulnerability scan on every imag
 
 ```yaml
 # Resolve once:
-docker pull xebialabsunsupported/dai-release-assistant:0.3.4
-docker inspect --format='{{index .RepoDigests 0}}' xebialabsunsupported/dai-release-assistant:0.3.4
-# Example output: xebialabsunsupported/dai-release-assistant@sha256:abc123...
+docker pull xebialabs/dai-release-assistant:26.3.0
+docker inspect --format='{{index .RepoDigests 0}}' xebialabs/dai-release-assistant:26.3.0
+# Example output: xebialabs/dai-release-assistant@sha256:abc123...
 
 # Then in .env:
-RELEASE_ASSISTANT_IMAGE=xebialabsunsupported/dai-release-assistant@sha256:abc123...
+RELEASE_ASSISTANT_IMAGE=xebialabs/dai-release-assistant@sha256:abc123...
 ```
 
 For the Postgres base image, prefer a specific minor (e.g. `postgres:18.4-alpine`, set via `POSTGRES_IMAGE`) over the floating `postgres:18-alpine`. Upgrade cadence: review quarterly; bump manually after testing the new minor.
@@ -1143,12 +1142,10 @@ Override any var shown below in `.env`. The default values shown in the tables b
 
 | Variable | Default | Description |
 |---|---|---|
-| `RELEASE_ASSISTANT_IMAGE` | `xebialabsunsupported/dai-release-assistant:0.3.4` | Assistant image (CORE) |
-| `LLM_SERVICE_API_IMAGE` | `xebialabsunsupported/llm-service-api:0.0.1.284` | LLM service API image (CORE, used by `--profile with-llm-service`) |
-| `LLM_SERVICE_DBINIT_IMAGE` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
+| `RELEASE_ASSISTANT_IMAGE` | `xebialabs/dai-release-assistant:26.3.0` | Assistant image (CORE) |
+| `LLM_SERVICE_API_IMAGE` | `xebialabs/llm-service-api:0.0.1.284` | LLM service API image (CORE, used by `--profile with-llm-service`) |
+| `LLM_SERVICE_DBINIT_IMAGE` | `xebialabs/llm-service-dbinit:0.0.1.284` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
 
-> **Production image replacement**: the `xebialabsunsupported/*` references above are internal-only. For production documentation and production deployments, switch to the approved `xebialabs/*` image references per the §20 compatibility matrix.
->
 > **Test-stack image tags** (`RELEASE_IMAGE`, `KEYCLOAK_IMAGE`, `POSTGRES_IMAGE`, `NGINX_IMAGE`) are documented in [test-lab/README.md §12](test-lab/README.md#12-test-stack-configuration-reference).
 
 ### Exposed host ports (`.env.base`)
@@ -1597,13 +1594,13 @@ The following matrix captures the current tested Docker image set for this repos
 | Release Assistant | LLM Service API | LLM Service DBInit | Digital.ai Release | Status | Validation date | Owner |
 |---|---|---|---|---|---|---|
 | `xebialabsunsupported/dai-release-assistant:0.3.4` | `xebialabsunsupported/llm-service-api:0.0.1.284` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | `xebialabsunsupported/xl-release:26.3.0-beta.811` | Provisional validated set for internal testing | 2026-08-11 | Release Assistant engineering |
+| `xebialabs/dai-release-assistant:26.3.0` | `xebialabs/llm-service-api:0.0.1.284` | `xebialabs/llm-service-dbinit:0.0.1.284` | `xebialabs/xl-release:26.3.0` | Provisional validated set for internal testing | 2026-09-23 | Release Assistant engineering |
 
 Compatibility guidance:
 
 - Upgrade components as a coordinated set unless a specific cross-version combination is explicitly validated.
 - The MCP endpoint ships inside the Digital.ai Release image; bumping Release is the only way to bump the MCP endpoint. The Assistant and the MCP endpoint must be compatible per the Release release notes.
 - Keep this matrix updated whenever any component image tag changes.
-- WARNING: `xebialabsunsupported/*` images are for internal usage only. For production documentation and production deployments, use `xebialabs/*` images.
 
 ## 21) Minimum supported versions
 
@@ -1622,7 +1619,6 @@ Compatibility guidance:
 
 ## 23) Production go-live checklist
 
-- Replace all `xebialabsunsupported/*` image references with approved `xebialabs/*` production image tags.
 - Confirm compatibility matrix entries for target production versions.
 - Validate TLS certificates, trust bundles, and firewall allowlists for all flows in section 3.
 - Store all secrets in an approved secret manager and rotate initial bootstrap credentials.

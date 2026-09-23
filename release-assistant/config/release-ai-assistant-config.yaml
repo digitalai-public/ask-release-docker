@@ -81,7 +81,7 @@ spring:
           include-usage: true
         max-tokens: ${AI_LLM_CHAT_MAX_TOKENS:4096}
         custom-headers:
-          X-Digitalai-AppName: release/integration
+          X-Digitalai-AppName: devops/release-ai-assistant
 
     # MCP Server Configuration (Configure your MCP servers)
     # The MCP server is embedded inside Digital.ai Release and exposed at
