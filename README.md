@@ -1594,7 +1594,7 @@ The following matrix captures the current tested Docker image set for this repos
 | Release Assistant | LLM Service API | LLM Service DBInit | Digital.ai Release | Status | Validation date | Owner |
 |---|---|---|---|---|---|---|
 | `xebialabsunsupported/dai-release-assistant:0.3.4` | `xebialabsunsupported/llm-service-api:0.0.1.284` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | `xebialabsunsupported/xl-release:26.3.0-beta.811` | Provisional validated set for internal testing | 2026-08-11 | Release Assistant engineering |
-| `xebialabs/dai-release-assistant:26.3.0` | `xebialabs/llm-service-api:0.0.1.284` | `xebialabs/llm-service-dbinit:0.0.1.284` | `xebialabs/xl-release:26.3.0` | Provisional validated set for internal testing | 2026-09-23 | Release Assistant engineering |
+| `xebialabs/dai-release-assistant:26.3.0` | `xebialabs/llm-service-api:0.0.1.284` | `xebialabs/llm-service-dbinit:0.0.1.284` | `xebialabs/xl-release:26.3.0-911.1035-jdk25-slim` | Provisional validated set for internal testing | 2026-09-23 | Release Assistant engineering |
 
 Compatibility guidance:
 

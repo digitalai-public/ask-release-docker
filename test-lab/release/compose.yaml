@@ -59,7 +59,7 @@ services:
       ask-release-data:
 
   xl-cli-apply-permissions:
-    image: ${XL_CLI_IMAGE:-xebialabsunsupported/xl-client:26.3.0-beta.811}
+    image: ${XL_CLI_IMAGE:-xebialabs/xl-client:26.3.0}
     profiles: ["with-release"]
     depends_on:
       release:

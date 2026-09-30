@@ -714,7 +714,7 @@ trust stores.
 RELEASE_ASSISTANT_IMAGE=xebialabs/dai-release-assistant:26.3.0
 LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.284
 LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.284
-RELEASE_IMAGE=xebialabs/xl-release:26.3.0
+RELEASE_IMAGE=xebialabs/xl-release:26.3.0-911.1035-jdk25-slim
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.7
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -792,7 +792,7 @@ git clean -fdx -e .env
 RELEASE_ASSISTANT_IMAGE=xebialabs/dai-release-assistant:26.3.0
 LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.284
 LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.284
-RELEASE_IMAGE=xebialabs/xl-release:26.3.0
+RELEASE_IMAGE=xebialabs/xl-release:26.3.0-911.1035-jdk25-slim
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.7
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -887,7 +887,7 @@ git clean -fdx -e .env
 RELEASE_ASSISTANT_IMAGE=xebialabs/dai-release-assistant:26.3.0
 LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.284
 LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.284
-RELEASE_IMAGE=xebialabs/xl-release:26.3.0
+RELEASE_IMAGE=xebialabs/xl-release:26.3.0-911.1035-jdk25-slim
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.7
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -988,7 +988,7 @@ git clean -fdx -e .env
 RELEASE_ASSISTANT_IMAGE=xebialabs/dai-release-assistant:26.3.0
 LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.284
 LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.284
-RELEASE_IMAGE=xebialabs/xl-release:26.3.0
+RELEASE_IMAGE=xebialabs/xl-release:26.3.0-911.1035-jdk25-slim
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.7
 POSTGRES_IMAGE=postgres:18.4-alpine
 NGINX_IMAGE=nginx:1.31-alpine
@@ -1248,7 +1248,7 @@ fallbacks live in the per-service test compose file
 
 | Variable | Default | Description |
 |---|---|---|
-| `RELEASE_IMAGE` | `xebialabs/xl-release:26.3.0` | Local Release image (used by `--profile with-release`) |
+| `RELEASE_IMAGE` | `xebialabs/xl-release:26.3.0-911.1035-jdk25-slim` | Local Release image (used by `--profile with-release`) |
 | `KEYCLOAK_IMAGE` | `quay.io/keycloak/keycloak:26.7` | Local Keycloak image (used by `--profile with-keycloak`) |
 | `POSTGRES_IMAGE` | `postgres:18.4-alpine` | Postgres image (used by `--profile with-postgres` / `with-release`) |
 | `NGINX_IMAGE` | `nginx:1.31-alpine` | nginx image (used by `--profile with-nginx`) |
