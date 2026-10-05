@@ -1143,8 +1143,8 @@ Override any var shown below in `.env`. The default values shown in the tables b
 | Variable | Default | Description |
 |---|---|---|
 | `RELEASE_ASSISTANT_IMAGE` | `xebialabs/dai-release-assistant:26.3.0` | Assistant image (CORE) |
-| `LLM_SERVICE_API_IMAGE` | `xebialabs/llm-service-api:0.0.1.284` | LLM service API image (CORE, used by `--profile with-llm-service`) |
-| `LLM_SERVICE_DBINIT_IMAGE` | `xebialabs/llm-service-dbinit:0.0.1.284` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
+| `LLM_SERVICE_API_IMAGE` | `xebialabs/llm-service-api:0.0.1.302` | LLM service API image (CORE, used by `--profile with-llm-service`) |
+| `LLM_SERVICE_DBINIT_IMAGE` | `xebialabs/llm-service-dbinit:0.0.1.302` | LLM dbinit one-shot image (CORE, used by `--profile with-llm-service`) |
 
 > **Test-stack image tags** (`RELEASE_IMAGE`, `KEYCLOAK_IMAGE`, `POSTGRES_IMAGE`, `NGINX_IMAGE`) are documented in [test-lab/README.md §12](test-lab/README.md#12-test-stack-configuration-reference).
 
@@ -1595,6 +1595,7 @@ The following matrix captures the current tested Docker image set for this repos
 |---|---|---|---|---|---|---|
 | `xebialabsunsupported/dai-release-assistant:0.3.4` | `xebialabsunsupported/llm-service-api:0.0.1.284` | `xebialabsunsupported/llm-service-dbinit:0.0.1.284` | `xebialabsunsupported/xl-release:26.3.0-beta.811` | Provisional validated set for internal testing | 2026-08-11 | Release Assistant engineering |
 | `xebialabs/dai-release-assistant:26.3.0` | `xebialabs/llm-service-api:0.0.1.284` | `xebialabs/llm-service-dbinit:0.0.1.284` | `xebialabs/xl-release:26.3.0-911.1035-jdk25-slim` | Provisional validated set for internal testing | 2026-09-23 | Release Assistant engineering |
+| `xebialabs/dai-release-assistant:26.3.0` | `xebialabs/llm-service-api:0.0.1.302` | `xebialabs/llm-service-dbinit:0.0.1.302` | `xebialabs/xl-release:26.3.0-911.1035-jdk25-slim` | Upgrade LLM Service version | 2026-10-05 | Release Assistant engineering |
 
 Compatibility guidance:
 

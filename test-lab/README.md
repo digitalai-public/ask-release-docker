@@ -712,8 +712,8 @@ trust stores.
 `.env` (customised from `.env.base`):
 ```bash
 RELEASE_ASSISTANT_IMAGE=xebialabs/dai-release-assistant:26.3.0
-LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.284
-LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.284
+LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.302
+LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.302
 RELEASE_IMAGE=xebialabs/xl-release:26.3.0-911.1035-jdk25-slim
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.7
 POSTGRES_IMAGE=postgres:18.4-alpine
@@ -790,8 +790,8 @@ git clean -fdx -e .env
 `.env`:
 ```bash
 RELEASE_ASSISTANT_IMAGE=xebialabs/dai-release-assistant:26.3.0
-LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.284
-LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.284
+LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.302
+LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.302
 RELEASE_IMAGE=xebialabs/xl-release:26.3.0-911.1035-jdk25-slim
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.7
 POSTGRES_IMAGE=postgres:18.4-alpine
@@ -885,8 +885,8 @@ git clean -fdx -e .env
 `.env`:
 ```bash
 RELEASE_ASSISTANT_IMAGE=xebialabs/dai-release-assistant:26.3.0
-LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.284
-LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.284
+LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.302
+LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.302
 RELEASE_IMAGE=xebialabs/xl-release:26.3.0-911.1035-jdk25-slim
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.7
 POSTGRES_IMAGE=postgres:18.4-alpine
@@ -986,8 +986,8 @@ git clean -fdx -e .env
 `.env`:
 ```bash
 RELEASE_ASSISTANT_IMAGE=xebialabs/dai-release-assistant:26.3.0
-LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.284
-LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.284
+LLM_SERVICE_API_IMAGE=xebialabs/llm-service-api:0.0.1.302
+LLM_SERVICE_DBINIT_IMAGE=xebialabs/llm-service-dbinit:0.0.1.302
 RELEASE_IMAGE=xebialabs/xl-release:26.3.0-911.1035-jdk25-slim
 KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.7
 POSTGRES_IMAGE=postgres:18.4-alpine
